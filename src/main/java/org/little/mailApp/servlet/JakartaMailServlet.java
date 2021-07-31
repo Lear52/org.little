@@ -1,15 +1,33 @@
 package org.little.mailApp.servlet;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Properties;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.mail.*;
+import javax.mail.Address;
+import javax.mail.FetchProfile;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Part;
-import javax.mail.internet.*;
-import javax.activation.*;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.Transport;
+import javax.mail.URLName;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.SingleThreadModel;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUtils;
 
 
 /**

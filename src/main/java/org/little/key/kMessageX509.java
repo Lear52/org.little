@@ -355,13 +355,15 @@ public class kMessageX509 {
     	    }
     	    return retVal;
        }
+       /*
        private static final String COUNTRY = "2.5.4.6";
        private static final String STATE = "2.5.4.8";
        private static final String LOCALE = "2.5.4.7";
        private static final String ORGANIZATION = "2.5.4.10";
        private static final String ORGANIZATION_UNIT = "2.5.4.11";
        private static final String COMMON_NAME = "2.5.4.3";
-       private static final String EMAIL = "2.5.4.9";       
+       private static final String EMAIL = "2.5.4.9";
+       */       
        //  Certificate Request Message
        private static kMessage parseX509CSRDER2MSG(kMessage msg,byte [] buf){
                String type="CERTIFICATE REQUEST";
@@ -403,8 +405,10 @@ public class kMessageX509 {
                       	  ASN1ObjectIdentifier t = att.getAttrType();
                       	  ASN1Set v = att.getAttrValues();
                       	  String txt="type:"+t.getId()+" v:"+v.toString();
+                          System.out.println(txt);
 
-                          ASN1Encodable[]  arr_v=v.toArray();System.out.println("attr["+i+"].v len:"+arr_v.length);
+                          ASN1Encodable[]  arr_v=v.toArray();
+                          System.out.println("attr["+i+"].v len:"+arr_v.length);
 
 
                       	  //msg.appendX509attrib(txt);
@@ -429,7 +433,7 @@ public class kMessageX509 {
                                           ASN1Encodable aaaaa=arr_aaaa[ii];
                                           System.out.println("aaaaa class:"+aaaaa.getClass().getName());
                                           System.out.println("txt:"+aaaaa.toString());
-                                          DEROctetString aaaaaa=(DEROctetString)aaaaa;
+                                          //DEROctetString aaaaaa=(DEROctetString)aaaaa;
                                           //ASN1Primitive a7=aaaaaa.toDERObject();
                                           //System.out.println("a7 class:"+a7.getClass().getName()+"txt:"+a7.toString());
 

@@ -1,5 +1,6 @@
 package org.little.mq.controlStream;
 
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -16,52 +17,69 @@ public class fc_groupR  extends task implements fc_group{
        private static final Logger logger = LoggerFactory.getLogger(fc_groupR.class);
 
        private ArrayList<fc_flow> flow_list;
-       private String             url_state;
-       private String             url_control;
+       private String             url_r_group;
        private String             userURL;
        private String             passwordURL;
        private String             id;
        private String             remote_id;
        private String             name;
-       private boolean            state_group;
+       private fc_node            node;
 
-       public fc_groupR(){
+       private int                count_active_flow;
+       private boolean            is_alarm; 
+       private long               time_alarm; 
+
+       public fc_groupR(fc_node  _node){
               clear();
+              node=_node;
        }
 
        @Override
        public void clear() {
               flow_list  =new ArrayList<fc_flow>();
-              state_group=false;
-              url_state  =null;  
-              url_control=null;
+              url_r_group=null;
               userURL    =null;    
               passwordURL=null;
               id         =null;  
               remote_id  =null;
               name       =null;
+              count_active_flow=0;
+              is_alarm=false;
+              time_alarm=0;
        }
        @Override
-       public String             getID() {return id;}
-       public String             getRID() {return remote_id;}
+       public String             getNodeID()          {return node.getID();}
        @Override
-       public void               setID(String id) {this.id = id;       }
+       public String             getID()              {return id;         }
        @Override
-       public String             getName() {return name;}
+       public String             getRID()             {return remote_id;  }
        @Override
-       public void               setName(String name) {this.name = name;}
+       public void               setID(String id)     {this.id = id;      }
        @Override
-       public boolean            getStateGroup(){return state_group;}
+       public String             getName()            {return name;       }
+       @Override
+       public void               setName(String name) {this.name = name;  }
+       @Override
+       public int                getActiveFlow()      {return count_active_flow;}
+       @Override
+       public boolean            isAlarm() {return is_alarm;};
+       @Override
+       public long               getTimeAlarm() {return time_alarm;};
+       @Override
+       public ArrayList<fc_flow> getFlowList(){return flow_list;}
 
        @Override
        public void work(){
 
-              logger.trace("begin run group");
+              //logger.trace("begin run group");
 
-              state_group      =false;
+              count_active_flow=0;
+              is_alarm         =false;
+              time_alarm       =0;
 
-              String _url_state=url_state+"?group="+getRID()+"&_="+System.currentTimeMillis();
-              lHttpCLN cln=new lHttpCLN(_url_state);
+              String _url_state=url_r_group+webMngr.url_cmd_base+webMngr.url_i_get_stat+"?node="+getNodeID()+"&group="+getRID()+"&_="+System.currentTimeMillis();
+              lHttpCLN cln=null;
+              try {cln=new lHttpCLN(_url_state,userURL,passwordURL); } catch (URISyntaxException e) { logger.error("create lHttpCLN("+_url_state+") ex:"+e);return; }
 
               logger.trace("new lHttpCLN("+_url_state+")");
 
@@ -74,54 +92,66 @@ public class fc_groupR  extends task implements fc_group{
                     return;
               }
 
-              logger.trace("getJSON("+_url_state+")");
-
-              if(root==null)return;
-
-              JSONArray glist=root.getJSONArray("list");//group 
-
-              logger.trace("getJSON("+_url_state+")  size list group json:"+glist.length());
-
-              if(glist.length()<1){
-
-                 return;
-              }
-
-              for(int ii=0;ii<glist.length();ii++) {
-                  JSONObject groot=glist.getJSONObject(ii);
-                  String _rid=groot.getString("id");
-                  if(_rid.equalsIgnoreCase(getRID())==false)continue;
-                  //setID  (root.getString("id"));
-                  //setName(root.getString("name"));
-                  JSONArray flist=groot.getJSONArray("list");// list flow
+              try{
+                  //logger.trace("getJSON("+_url_state+")");
                  
-                  logger.trace("getJSON("+_url_state+") group id:"+getID()+" name:"+getName() +" list flow json:"+flist);
+                  if(root==null)return;
                  
-                  for(int i=0;i<flist.length();i++) {
-                      fc_flow    flow;
-                      if(i>=flow_list.size()){
-                         flow=new fc_flowR();
-                         flow_list.add(flow);
-                      }
-                      else{
-                         flow=flow_list.get(i);
-                      }
-                      JSONObject f_json=flist.getJSONObject(i);
-                      flow.setState(f_json);
-                      flow.work();
+                  JSONArray nlist=root.getJSONArray("list_node");//group 
+
+                  JSONObject _root=nlist.getJSONObject(0);
+
+                  JSONArray glist=_root.getJSONArray("list_group");//group 
+                 
+                  logger.trace("getJSON("+_url_state+")  size list group json:"+glist.length());
+                 
+                  if(glist.length()<1){
+                     return;
                   }
-                  state_group      =true;
+                 
+                  for(int ii=0;ii<glist.length();ii++) {
+                      JSONObject groot=glist.getJSONObject(ii);
+                      String _rid=groot.getString("id");
+                      if(_rid.equalsIgnoreCase(getRID())==false)continue;
+                      
+                      //----------------------------------------------------------------------------------------------------------
+                      JSONArray flist=groot.getJSONArray("list_flow");// list flow
+                      //logger.trace("getJSON("+_url_state+") group id:"+getID()+" name:"+getName() +" list flow json:"+flist);
+                     
+                      for(int i=0;i<flist.length();i++) {
+                          fc_flow    flow;
+                          if(i>=flow_list.size()){
+                             flow=new fc_flowR();
+                             flow_list.add(flow);
+                          }
+                          else{
+                             flow=flow_list.get(i);
+                          }
+                          
+                          JSONObject f_json=flist.getJSONObject(i);
+                          flow.setState(f_json);
+                          flow.work();
+                      }
+                      //----------------------------------------------------------------------------------------------------------
+                      count_active_flow=groot.getInt("state");
+                      is_alarm         =groot.getBoolean("alarm"); 
+                      time_alarm       =groot.getLong("time_alarm");  
+                  }
+              } 
+              catch (Exception ex1) {
+                    logger.error("ex:"+new Except("parse json:"+root,ex1));
+                    return;
               }
 
-              logger.trace("end run group id:"+getID()+" name:"+getName());
+              //logger.trace("end run group id:"+getID()+" name:"+getName());
               
        }
        @Override
        public JSONObject setFlag(String flow_id, boolean is_flag) {
-              String _url_control=url_control+"?group="+getRID()+"&flow="+flow_id+"&state="+is_flag+"&_="+System.currentTimeMillis();
-              state_group      =false;
+              String _url_control=url_r_group+webMngr.url_cmd_base+webMngr.url_i_set_flag+"?node="+getNodeID()+"&group="+getRID()+"&flow="+flow_id+"&state="+is_flag+"&_="+System.currentTimeMillis();
 
-              lHttpCLN cln=new lHttpCLN(_url_control);
+              lHttpCLN cln=null;
+              try {cln=new lHttpCLN(_url_control,userURL,passwordURL); } catch (URISyntaxException e) { logger.error("create lHttpCLN("+_url_control+") ex:"+e);return null; }
 
               logger.trace("new lHttpCLN("+_url_control+")");
 
@@ -138,22 +168,103 @@ public class fc_groupR  extends task implements fc_group{
 
               if(root==null)return null;
 
-
               logger.trace("setFlag("+_url_control+" group id:"+getID()+" flow:"+flow_id +" flag:"+is_flag+") ret:"+root);
 
+              //logger.trace("end setFlag groupR id:"+getID()+" name:"+getName());
 
-              state_group      =true;
+              return root;
+       }
+       @Override
+       public JSONObject setFlagAll(boolean is_flag) {
+              String _url_control=url_r_group+webMngr.url_cmd_base+webMngr.url_i_set_flag_all+"?node="+getNodeID()+"&group="+getRID()+"&state="+is_flag+"&_="+System.currentTimeMillis();
 
-              logger.trace("end setFlag groupR id:"+getID()+" name:"+getName());
+
+              lHttpCLN cln=null;
+              try {cln=new lHttpCLN(_url_control,userURL,passwordURL); } catch (URISyntaxException e) { logger.error("create lHttpCLN("+_url_control+") ex:"+e);return null; }
+
+              logger.trace("new lHttpCLN("+_url_control+")");
+
+              JSONObject root=null;
+              try{
+                  root=cln.getJSON();
+              } 
+              catch (Exception ex) {
+                    logger.error("ex:"+new Except("cln.getJSON("+_url_control+")",ex));
+                    return null;
+              }
+
+              logger.trace("getJSON("+_url_control+")");
+
+              if(root==null)return null;
+
+              logger.trace("setFlagAll("+_url_control+" group id:"+getID() +" flag:"+is_flag+") ret:"+root);
+
+              //logger.trace("end setFlag groupR id:"+getID()+" name:"+getName());
+
+              return root;
+       }
+       @Override
+       public JSONObject setChannel(String flow_id, boolean is_run) {
+              String _url_control=url_r_group+webMngr.url_cmd_base+webMngr.url_i_exec_chl+"?node="+getNodeID()+"&group="+getRID()+"&flow="+flow_id+"&state="+is_run+"&_="+System.currentTimeMillis();
+
+              lHttpCLN cln=null;
+              try {cln=new lHttpCLN(_url_control,userURL,passwordURL); } catch (URISyntaxException e) { logger.error("create lHttpCLN("+_url_control+") ex:"+e);return null; }
+
+              logger.trace("new lHttpCLN("+_url_control+")");
+
+              JSONObject root=null;
+              try{
+                  root=cln.getJSON();
+              } 
+              catch (Exception ex) {
+                    logger.error("ex:"+new Except("cln.getJSON("+_url_control+")",ex));
+                    return null;
+              }
+
+              logger.trace("getJSON("+_url_control+")");
+
+              if(root==null)return null;
+
+              logger.trace("setChannel("+_url_control+" group id:"+getID()+" flow:"+flow_id +" is_run:"+is_run+") ret:"+root);
+
+              //logger.trace("end setChannel groupR id:"+getID()+" name:"+getName());
+
+              return root;
+       }
+       @Override
+       public JSONObject setChannelAll(boolean is_run) {
+              String _url_control=url_r_group+webMngr.url_cmd_base+webMngr.url_i_exec_chl_all+"?node="+getNodeID()+"&group="+getRID()+"&state="+is_run+"&_="+System.currentTimeMillis();
+
+              lHttpCLN cln=null;
+              try {cln=new lHttpCLN(_url_control,userURL,passwordURL); } catch (URISyntaxException e) { logger.error("create lHttpCLN("+_url_control+") ex:"+e);return null; }
+
+              logger.trace("new lHttpCLN("+_url_control+")");
+
+              JSONObject root=null;
+              try{
+                  root=cln.getJSON();
+              } 
+              catch (Exception ex) {
+                    logger.error("ex:"+new Except("cln.getJSON("+_url_control+")",ex));
+                    return null;
+              }
+
+              logger.trace("getJSON("+_url_control+")");
+
+              if(root==null)return null;
+
+              logger.trace("setChannelAll("+_url_control+" group id:"+getID() +" is_run:"+is_run+") ret:"+root);
+
+              //logger.trace("end setChannelAll groupR id:"+getID()+" name:"+getName());
 
               return root;
        }
        @Override
        public JSONObject ClearQ(String flow_id,String mngr_id,String q_id){
-              String _url_control=url_control+"?group="+getRID()+"&mngr="+mngr_id+"&q="+q_id+"&_="+System.currentTimeMillis();
-              state_group      =false;
+              String _url_control=url_r_group+webMngr.url_cmd_base+webMngr.url_i_exec_clr+"?node="+getNodeID()+"&group="+getRID()+"&mngr="+mngr_id+"&q="+q_id+"&_="+System.currentTimeMillis();
 
-              lHttpCLN cln=new lHttpCLN(_url_control);
+              lHttpCLN cln=null;
+              try {cln=new lHttpCLN(_url_control,userURL,passwordURL); } catch (URISyntaxException e) { logger.error("create lHttpCLN("+_url_control+") ex:"+e);return null; }
 
               logger.trace("new lHttpCLN("+_url_control+")");
 
@@ -174,33 +285,17 @@ public class fc_groupR  extends task implements fc_group{
               logger.trace("ClearQ("+_url_control+" group id:"+getID()+" flow:"+flow_id + " ret:"+root);
 
 
-              state_group      =true;
+              //state_group      =1;
 
-              logger.trace("end ClearQ groupR id:"+getID()+" name:"+getName());
+              //logger.trace("end ClearQ groupR id:"+getID()+" name:"+getName());
 
               return root;
        }
        @Override
        public JSONObject getStat(){
-
-              JSONObject root=new JSONObject();
-              JSONArray  list=new JSONArray();
-              root.put("type" , "group");
-              root.put("id"   , getID());
-              root.put("rid"  , getRID());
-              root.put("state", getStateGroup());
-              root.put("name" , getName());
-              root.put("size", flow_list.size());
-              for(int i=0;i<flow_list.size();i++) {
-                  fc_flow flow=flow_list.get(i);
-                  list.put(i,flow.getStat());
-              }
-              root.put("list", list);
-
-              logger.trace("fc_group getStat() id:"+id+" name:"+name+" size:"+flow_list.size());
-              
+              JSONObject root=fc_group.getStat(this);
+              logger.trace("fc_groupR getStat() id:"+id+" name:"+name+" size:"+flow_list.size());
               return root;
-
        }
 
        @Override
@@ -242,11 +337,10 @@ public class fc_groupR  extends task implements fc_group{
               if(glist==null) return;
               for(int i=0;i<glist.getLength();i++){
                   Node n=glist.item(i);
-                  if("url_state" .equalsIgnoreCase(n.getNodeName())){url_state  =n.getTextContent(); logger.info("group(r) url_state:" +url_state  );}else
-                  if("url_contrl".equalsIgnoreCase(n.getNodeName())){url_control=n.getTextContent(); logger.info("group(r) url_contrl:"+url_control);}else
+                  if("url_r_group".equalsIgnoreCase(n.getNodeName())){url_r_group=n.getTextContent(); logger.info("group(r) url_r_group:" +url_r_group  );}else
                   if("url_user"  .equalsIgnoreCase(n.getNodeName())){userURL    =n.getTextContent(); logger.info("group(r) url_user:"  +userURL    );}else
                   if("url_passwd".equalsIgnoreCase(n.getNodeName())){passwordURL=n.getTextContent(); logger.info("group(r) url_passwd:"+passwordURL);}
-                  if("remote_id" .equalsIgnoreCase(n.getNodeName())){remote_id=n.getTextContent();   logger.info("group(r) remote_id:"+remote_id);}
+                  if("remote_id" .equalsIgnoreCase(n.getNodeName())){remote_id=n.getTextContent();   logger.info("group(r) remote_id:" +remote_id);}
               }
               
        }

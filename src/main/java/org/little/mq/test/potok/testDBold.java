@@ -1,6 +1,4 @@
 package org.little.mq.test.potok;
-
-
 import org.little.util.Except;
 import org.little.util.Logger;
 import org.little.util.cfg.commonPRJ;
@@ -8,8 +6,6 @@ import org.little.util.db.connection_pool;
 import org.little.util.db.dbExcept;
 import org.little.util.db.query;
 import org.little.util.run.tfork;
-
-
 
 public class testDBold  extends tfork{
        final private static String CLASS_NAME="prj0.potok.testDBold";

@@ -11,55 +11,53 @@ import org.w3c.dom.Node;
 public class fc_Q {
        private static final Logger logger = LoggerFactory.getLogger(fc_Q.class);
 
-       protected commonMQ  cfg;
-       //private String mq_mngr;
-       //private String mq_queue;
-       private int    deepQ;
-       private boolean is_alarm;
+       protected commonMQ      cfg;
+       private int             deepQ;
+       private boolean         is_alarm;
+       private long            start_alarm;
 
        public fc_Q() {
     	      clear();
        }
        protected void   clear() {
       	       cfg=new commonMQ(); 
-  
-    	       //this.mq_mngr = "noname_mngr";
-    	       //this.mq_queue= "noname_queue";
     	       this.deepQ   = 0;
     	       this.is_alarm=false;
+    	       this.start_alarm=0;
        }
        
        public String  getNameQ()           {return cfg.getNameQ();}
-       //public void    setNameQ(String q)   {this.mq_queue = q;}
        public String  getNameMngr()        {return cfg.getNameMngr();}
-       //public void    setNameMngr(String m){this.mq_mngr = m;}
                      
        public int     getDeepQ()           {return deepQ;}
        public void    setDeepQ(int _deepQ) {this.deepQ = _deepQ;}
 
        public boolean isAlarm()            {return is_alarm;}
-       public void    isAlarm(boolean a)   {is_alarm=a;}
+       public void    isAlarm(boolean a)   {is_alarm=a;if(is_alarm==true)start_alarm=System.currentTimeMillis();else start_alarm=0;}
 
+       public long    getTimeAlarm()          {if(is_alarm==true)return System.currentTimeMillis()-start_alarm;else return 0;}
+       
        public JSONObject getState() {
               JSONObject root=new JSONObject();
 
-              root.put("type" ,"q");
-              root.put("queue",cfg.getNameQ());
-              root.put("mngr" ,cfg.getNameMngr());
-              root.put("len"  ,getDeepQ());
-              root.put("alarm",isAlarm());
+              root.put("type"      ,"q");
+              root.put("queue"     ,cfg.getNameQ());
+              root.put("mngr"      ,cfg.getNameMngr());
+              root.put("len"       ,getDeepQ());
+              root.put("alarm"     ,isAlarm());
+              root.put("time_alarm",getTimeAlarm());
 
               return root;
        }
        protected JSONObject ClearQ(){JSONObject root=new JSONObject();return root;}
 
        protected void setState(JSONObject root) {
-                 logger.trace("setStat json:"+root); 
+                 //logger.trace("setStat json:"+root); 
                  try{
                     cfg.setNameMngr(root.getString ("mngr"  ));
                     cfg.setNameQ   (root.getString ("queue" ));
-                    setDeepQ   (root.getInt    ("len"   ));
-                    isAlarm    (root.getBoolean("alarm" ));
+                    setDeepQ       (root.getInt    ("len"   ));
+                    isAlarm        (root.getBoolean("alarm" ));
                  }
                  catch(Exception e){
                        logger.trace("setStat json:"+root+" ex:"+new Except("",e)); 

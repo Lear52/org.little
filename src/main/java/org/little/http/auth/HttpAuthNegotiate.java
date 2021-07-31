@@ -50,7 +50,6 @@ public class HttpAuthNegotiate extends HttpAuth {
        private        GSSCredential        serverCredentials;    /** Credentials server uses for authenticating requests. */
 
 
-       @SuppressWarnings("unused")
        private   HttpAuthNegotiate() {super(HttpAuth.SPNEGO,null);}
 
        protected HttpAuthNegotiate(int _type_auth,statChannel _stat) {

@@ -5,14 +5,16 @@ import org.little.util.LoggerFactory;
 import org.little.util.common;
 
 public class fc_common  extends common{
-       private static final Logger logger = LoggerFactory.getLogger(fc_mngr.class);
+       private static final Logger logger = LoggerFactory.getLogger(fc_common.class);
 
        public fc_common() {
               setNodeName("littlestat");
+              logger.trace("fc_common:"+"littlestat");
        }
 
        @Override
        public void init() {
+            logger.trace("init()");
             init(this.getNode());
        }
 

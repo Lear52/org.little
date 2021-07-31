@@ -2,12 +2,10 @@ package org.little.mq.controlStream;
 
 import java.util.ArrayList;
 
-import org.little.util.run.task;
+import org.json.JSONObject;
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.little.util.run.task;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -17,24 +15,32 @@ public class fc_groupL extends task implements fc_group{
        private ArrayList<fc_flow> flow_list;
        private String             id;
        private String             name;
-       private boolean            state_group;
-       private fc_mngr            mngr;
+       private int                count_active_flow; 
+       private boolean            is_alarm; 
+       private long               time_alarm; 
+       private fc_node            node;
 
-       public fc_groupL(fc_mngr _mngr){
+       public fc_groupL(fc_node _node){
               clear();
-              mngr=_mngr;
+              node=_node;
        }
 
        @Override
        public void clear() {
-              state_group      =false;
-              flow_list=new ArrayList<fc_flow>();
+              count_active_flow=0;
+              is_alarm=false;
+              time_alarm=0;
+              flow_list  =new ArrayList<fc_flow>();
               id         =null;  
               name       =null;
        }
 
        @Override
+       public String             getNodeID() {return node.getID();}
+       @Override
        public String             getID() {return id;}
+       @Override
+       public String             getRID() {return getID();}
        @Override
        public void               setID(String id) {this.id = id;       }
        @Override
@@ -42,37 +48,35 @@ public class fc_groupL extends task implements fc_group{
        @Override
        public void               setName(String name) {this.name = name;}
        @Override
-       public boolean            getStateGroup(){return state_group;}
+       public int                getActiveFlow(){return count_active_flow;}
+       @Override
+       public boolean            isAlarm() {return is_alarm;};
+       @Override
+       public long               getTimeAlarm() {return time_alarm;};
+       
+       @Override
+       public ArrayList<fc_flow> getFlowList(){return flow_list;}
 
        @Override
        public void work(){
-              state_group      =false;
+              count_active_flow      =0;
+              is_alarm=false;
+              time_alarm=0;
               for(int i=0;i<flow_list.size();i++) {
                   fc_flow flow=flow_list.get(i);
                   logger.trace("group id:"+id+" name:"+name+" flow:"+i);
-                  flow.work();  
+                  flow.work();  // get state flow
               }
-              state_group      =true;
-              
+              for(int i=0;i<flow_list.size();i++) {
+                  fc_flow flow=flow_list.get(i);
+                  if(flow.isAlarm())is_alarm=true;else count_active_flow++; 
+                  if(flow.getTimeAlarm()>time_alarm)time_alarm=flow.getTimeAlarm();
+              }
        }
        @Override
        public JSONObject getStat(){
-
-              JSONObject root=new JSONObject();
-              JSONArray  list=new JSONArray();
-              root.put("type", "group");
-              root.put("id", getID());
-              root.put("name", getName());
-              root.put("state", getStateGroup());
-              for(int i=0;i<flow_list.size();i++) {
-                  fc_flow flow=flow_list.get(i);
-                  list.put(i,flow.getStat());
-              }
-              root.put("list", list);
-              root.put("size", flow_list.size());
-
-              logger.trace("fc_group getStat() id:"+id+" name:"+name+" size:"+flow_list.size());
-              
+              JSONObject root=fc_group.getStat(this);
+              logger.trace("fc_groupL getStat() id:"+id+" name:"+name+" size:"+flow_list.size());
               return root;
 
        }
@@ -108,7 +112,7 @@ public class fc_groupL extends task implements fc_group{
               for(int i=0;i<glist.getLength();i++){
                   Node n=glist.item(i);
                   if("flow".equalsIgnoreCase(n.getNodeName()) ){           
-                     fc_flow flow=new fc_flowL(mngr);
+                     fc_flow flow=new fc_flowL(node);
                      flow.init(n);
                      flow_list.add(flow);
                   }
@@ -131,12 +135,55 @@ public class fc_groupL extends task implements fc_group{
               
               return root;
        }
+       @Override
+       public JSONObject setFlagAll(boolean is_flag) {
+
+              JSONObject root=new JSONObject();
+
+              for(int i=0;i<flow_list.size();i++){
+                     JSONObject ret=flow_list.get(i).setFlag(is_flag); 
+                     root.put("resp", ret);
+              }
+              
+              return root;
+       }
+       @Override
+       public JSONObject setChannel(String flow_id, boolean is_channel) {
+
+              JSONObject root=new JSONObject();
+              //logger.trace("setChannel");
+
+              for(int i=0;i<flow_list.size();i++){
+                  if(flow_list.get(i).getID().equalsIgnoreCase(flow_id)) {
+                     logger.trace("setChannel flow_id:"+flow_id);
+                     JSONObject ret=flow_list.get(i).setChannel(is_channel); 
+                     root.put("resp", ret);
+                     break;
+                  }
+              }
+              
+              //logger.trace("setChannel");
+
+              return root;
+       }
+       @Override
+       public JSONObject setChannelAll(boolean is_channel) {
+
+              JSONObject root=new JSONObject();
+
+              for(int i=0;i<flow_list.size();i++){
+                     JSONObject ret=flow_list.get(i).setChannel(is_channel); 
+                     root.put("resp", ret);
+              }
+
+              return root;
+       }
 
        @Override
        public JSONObject ClearQ(String flow_id,String mngr_id,String q_id){
               JSONObject root=new JSONObject();
 
-              logger.trace("group.ClearQ(group:"+id+",flow:"+flow_id+",mngr:"+mngr_id+",q:"+q_id+")");
+              //logger.trace("group.ClearQ(group:"+id+",flow:"+flow_id+",mngr:"+mngr_id+",q:"+q_id+")");
               for(int i=0;i<flow_list.size();i++){
                   if(flow_list.get(i).getID().equals(flow_id)) {
                      JSONObject ret=flow_list.get(i).ClearQ(mngr_id,q_id); 

@@ -14,23 +14,23 @@ import org.w3c.dom.Node;
 public class fc_controlL extends fc_control{
        private static final Logger logger = LoggerFactory.getLogger(fc_controlL.class);
 
-       private mq_util cntrl;
-
+       private mq_util   cntrl;
+       private mq_contrl mon;
        public fc_controlL(){
               clear();
-              cntrl=null;
        }
-
 
        @Override
        protected void   clear() {
-              super.clear();
+                 super.clear();
+                 cntrl=null;
+                 mon=null;
        }
-       @Override
-       public void init(Node node_cfg) {
-              cntrl=new mq_util();
-              cfg.init(node_cfg);
+       protected void reopen() {
+
+              if(cntrl==null)
               try {
+                   cntrl=new mq_util();
                    cntrl.open(cfg.getNameMngr(),cfg.getHost(),cfg.getPort(),cfg.getChannel(),cfg.getUser(),cfg.getPasswd());
               }
               catch (mqExcept m){
@@ -38,15 +38,27 @@ public class fc_controlL extends fc_control{
                      try {cntrl.close();}catch (mqExcept m1){}
                      cntrl=null;
               }
-
+              if(mon==null)
+              try {
+                   mon  =new mq_contrl();
+                   mon.open(cfg.getNameMngr(),cfg.getHost(),cfg.getPort(),cfg.getChannel(),cfg.getUser(),cfg.getPasswd());
+              }
+              catch (mqExcept m){
+                     logger.error("cntrl.open ex:"+m);
+                     try {mon.close();}catch (mqExcept m1){}
+                     mon=null;
+              }
+       }
+       @Override
+       public void init(Node node_cfg) {
+              cfg.init(node_cfg);
+              reopen();
        }
        @Override
        protected JSONObject setFlag(boolean flag) {
                  JSONObject root=new JSONObject();
 
     	         controlFlag(flag);
-
-    	         mq_util cntrl=new mq_util();
 
                  if(isManual()||cntrl==null){
                     logger.error("can't set flag is_manual:"+isManual());
@@ -55,10 +67,11 @@ public class fc_controlL extends fc_control{
                  }
                  else
                  try {
-                      //cntrl.open(cfg.getNameMngr(),cfg.getHost(),cfg.getPort(),cfg.getChannel(),cfg.getUser(),cfg.getPasswd());
-                      if(isFlag())cntrl.putMsg(cfg.getNameQ(),"cuntrol q "+ new Date());
-                      else        cntrl.clear (cfg.getNameQ());
-                      //cntrl.close();
+                      reopen();
+                      if(cntrl!=null){
+                         if(isFlag())cntrl.putMsg(cfg.getNameQ(),"cuntrol q "+ new Date());
+                         else        cntrl.clear (cfg.getNameQ());
+                      }
                  }
                  catch (mqExcept m){
                        logger.error("setFlag("+flag+") ex:"+m);
@@ -76,18 +89,18 @@ public class fc_controlL extends fc_control{
 
        @Override
        public void work(){
-              logger.info("1 work() queue:"+cfg.getNameQ()+" flag:"+isFlag());
-              mq_contrl cntrl=new mq_contrl();
+              //logger.trace("1 work() queue:"+cfg.getNameQ()+" flag:"+isFlag());
+
               int len=0;
               try {
-                   //cntrl.open(cfg.getNameMngr(),cfg.getHost(),cfg.getPort(),cfg.getChannel(),cfg.getUser(),cfg.getPasswd());
-                   len=cntrl.lengthLocalQueues(cfg.getNameQ());
+                   reopen();
+                   if(mon!=null)len=mon.lengthLocalQueues(cfg.getNameQ());
                    //cntrl.close();
               }
               catch (mqExcept m){
                     logger.error("work() ex:"+m);
-                    try {cntrl.close();}catch (mqExcept m1){}
-                    cntrl=null;
+                    try {mon.close();}catch (mqExcept m1){}
+                    mon=null;
                     isFlag(false);
                     return;
               }
@@ -101,15 +114,16 @@ public class fc_controlL extends fc_control{
                  isManual(false);
                  isFlag(false);
               }
-              logger.info("2 work() queue:"+cfg.getNameQ()+" flag:"+isFlag());
+              logger.trace("2 work() queue:"+cfg.getNameQ()+" flag:"+isFlag());
 
        }
        @Override
        public void close(){
               super.close();
-              if(cntrl==null)return;
-              try {cntrl.close();}catch (mqExcept m1){}
+              if(cntrl!=null)try {cntrl.close();}catch (mqExcept m1){}
+              if(mon!=null)try {mon.close();}catch (mqExcept m1){}
               cntrl=null;
+              mon=null;
        }
 
 }

@@ -1,8 +1,12 @@
 package org.little.mailApp;
        
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * This servlet is used to determine whether the user is logged in before
@@ -11,6 +15,11 @@ import javax.servlet.http.*;
 public class FilterServlet extends HttpServlet {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8813396427860061521L;
+
+	/**
      * This method handles the "POST" submission from two forms: the
      * login form and the message compose form.
      */

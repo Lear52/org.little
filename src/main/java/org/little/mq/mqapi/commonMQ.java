@@ -18,7 +18,7 @@ public class commonMQ{
 
        public commonMQ() {
               clear();
-              logger.info("create commonMQ");
+              //logger.info("create commonMQ");
        }
 
        public void clear() {

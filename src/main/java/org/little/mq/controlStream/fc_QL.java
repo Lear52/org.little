@@ -36,7 +36,7 @@ public class fc_QL extends fc_Q{
        @Override
        public JSONObject getState() {
               JSONObject q=super.getState();
-              logger.info("getState() queue:"+getNameQ()+" len:"+getDeepQ());
+              //logger.info("getState() queue:"+getNameQ()+" len:"+getDeepQ());
               return q;
        }
        @Override
@@ -63,8 +63,8 @@ public class fc_QL extends fc_Q{
 
               }
               catch (mqExcept m){
-                    logger.error("work() ex:"+m);
-                    return;
+                    //logger.error("close()  ex:"+m);
+                    //return;
               }
               cntrl=null;
               clear();
@@ -104,14 +104,7 @@ public class fc_QL extends fc_Q{
               if(glist==null) return;
               for(int i=0;i<glist.getLength();i++){
                   Node n=glist.item(i);
-                  //if("mngr"    .equals(n.getNodeName())){String mq_mngr   =n.getTextContent();logger.info("mngr:"    +mq_mngr   );setNameMngr(mq_mngr);}else
-                  //if("queue"   .equals(n.getNodeName())){String mq_queue  =n.getTextContent();logger.info("queue:"   +mq_queue  );setNameQ(mq_queue);  }else
-                  //if("host"    .equals(n.getNodeName())){mq_host          =n.getTextContent();logger.info("host:"    +mq_host   );                     }else
-                  //if("port"    .equals(n.getNodeName())){String          s=n.getTextContent();try{mq_port=Integer.parseInt(s,10);}catch(Exception e){logger.error("error set port:"+s);mq_port=1414;}logger.info("port:"+mq_port        );}else
-                  //if("user"    .equals(n.getNodeName())){mq_user          =n.getTextContent();logger.info("user:"    +mq_user   );                     }else
-                  //if("password".equals(n.getNodeName())){mq_passwd        =n.getTextContent();logger.info("password:"+mq_passwd );                     }else
                   if("deep"    .equalsIgnoreCase(n.getNodeName())){String          s=n.getTextContent();try{deep_alarm=Integer.parseInt(s,10);}catch(Exception e){logger.error("error set deep:"+s);deep_alarm=150;}logger.info("deep:"+deep_alarm);}
-                  //if("channel" .equals(n.getNodeName())){mq_channel       =n.getTextContent();logger.info("channel:" +mq_channel  );}
               }
 
 

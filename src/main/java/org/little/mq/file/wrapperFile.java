@@ -57,7 +57,7 @@ public class wrapperFile implements WrapperListener{
               serverFile.isRun(false);
               return 0;
        }
-
+ 
        public void controlEvent(int event){
          
               logger.trace("Event CSKI:"+event);

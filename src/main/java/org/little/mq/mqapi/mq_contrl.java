@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import org.little.util.Logger;
+import org.little.util.LoggerFactory;
 
 //import com.ibm.mq.MQC;
 import com.ibm.mq.MQMessage;
@@ -18,14 +19,11 @@ import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import com.ibm.mq.headers.pcf.PCFParameter;
 
 public class mq_contrl{
-       final private static String CLASS_NAME="prj0.stream.mq.mqContrl";
-       final private static int    CLASS_ID  =1702;
-             public  static String getClassName(){return CLASS_NAME;}
-             public  static int    getClassId(){return CLASS_ID;}
-             private static Logger log=new Logger(CLASS_NAME);
+       private static final Logger logger = LoggerFactory.getLogger(mq_contrl.class);
 
        private mq_mngr         queueManager;
        private PCFMessageAgent agent;
+       private int             reason;
        private boolean         isUsed;
        private boolean         isOpen;
 
@@ -37,12 +35,15 @@ public class mq_contrl{
               queueManager   = new mq_mngr();
               isUsed           = false;
               isOpen           = false;
+              reason           =0;
        }
        public boolean isUse(){return isUsed;}
        public void    isUse(boolean is){isUsed=is;}
+
        public boolean isOpen(){return isOpen;}
        public void    isOpen(boolean is){isOpen=is;}
 
+       public int     getReason(){return reason;}
 
        public int open(String _qmname,String _host,int _port,String _channel,String user,String passwd) throws  mqExcept {
               queueManager=new mq_mngr(_qmname,_host,_port, _channel);
@@ -55,24 +56,26 @@ public class mq_contrl{
               }
               catch (MQDataException mqde) {
                  mqExcept e1=new mqExcept("pcf agent connect",mqde);
-                 if(!queueManager.isLocal()) log.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
-                 else       log.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
+                 if(!queueManager.isLocal()) logger.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
+                 else       logger.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
                  throw e1;
              }
              isOpen(true); 
+             reason =0;
              return 0;
        }
 
       
        public void close() throws  mqExcept{
+              reason =0;
               isOpen(false); 
               try {
                   if(agent!=null)agent.disconnect();
               }
               catch (MQDataException e) {
                      mqExcept e1=new mqExcept("pcf agent disconnect",e);
-                     if(!queueManager.isLocal()) log.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
-                     else       log.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
+                     if(!queueManager.isLocal()) logger.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
+                     else       logger.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
                      throw e1;
               }
               try {
@@ -80,46 +83,50 @@ public class mq_contrl{
               }
               catch (Exception e2) {
                      mqExcept e1=new mqExcept("pcf agent disconnect",e2);
-                     if(!queueManager.isLocal()) log.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
-                     else       log.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
+                     if(!queueManager.isLocal()) logger.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
+                     else       logger.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
                      throw e1;
               }
 
        }
        private PCFMessage[] sendCmd(String cmd,PCFMessage pcfCmd) throws  mqExcept{
+               reason=0;
                isUse(true);
                PCFMessage[] pcfResponse =null;
                try {
                  pcfResponse=agent.send(pcfCmd);
                }
                catch (PCFException e10) {
+                      reason =e10.reasonCode;
                       if((e10.reasonCode == 3065) || (e10.reasonCode == 3200)) {/**/
-                         log.trace("mngr:"+queueManager.getQMName()+" cmd:"+cmd+" rc:"+e10.reasonCode);
+                         logger.trace("mngr:"+queueManager.getQMName()+" cmd:"+cmd+" rc:"+e10.reasonCode);
                          return null;//pcfResponse; 
                       } 
                       if(e10.reasonCode == 4064) {
-                         log.trace("mngr:"+queueManager.getQMName()+" cmd:"+cmd+" rc:"+e10.reasonCode);
-                         return null; 
+                         logger.trace("mngr:"+queueManager.getQMName()+" cmd:"+cmd+" rc:"+e10.reasonCode);
+                         return pcfResponse;//null; 
                       } 
                       if(e10.reasonCode == 4031) {
-                         log.trace("mngr:"+queueManager.getQMName()+" cmd:"+cmd+" rc:"+e10.reasonCode);
+                         logger.trace("mngr:"+queueManager.getQMName()+" cmd:"+cmd+" rc:"+e10.reasonCode);
                          return null; 
                       } 
                       mqExcept e1=new mqExcept(cmd,e10);
-                      if(!queueManager.isLocal()) log.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
-                      else                        log.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
+                      if(!queueManager.isLocal()) logger.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
+                      else                        logger.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
                       throw e1;
                }
                catch (MQDataException e11) {
+                      reason =-1;
                       mqExcept e1=new mqExcept(cmd,e11);
-                      if(!queueManager.isLocal()) log.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
-                      else       log.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
+                      if(!queueManager.isLocal()) logger.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
+                      else                        logger.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
                       throw e1;
                }
                catch (Exception e12) {
+                      reason =-1;
                       mqExcept e1=new mqExcept(cmd,e12);
-                      if(!queueManager.isLocal()) log.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
-                      else       log.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
+                      if(!queueManager.isLocal()) logger.error("Error open mngr:"+queueManager.getQMName()+" host:"+queueManager.getHost()+" port:"+queueManager.getPort()+" channel:"+queueManager.getChannel()+" ex:"+e1);
+                      else                        logger.error("Error open mngr:"+queueManager.getQMName()+" ex:"+e1);
                       throw e1;
                }
                finally{
@@ -128,18 +135,19 @@ public class mq_contrl{
                return pcfResponse;
 
        }
-       public void startChannel(String pcfChannel) throws  mqExcept{
+       public int startChannel(String pcfChannel) throws  mqExcept{
 
-               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_START_CHANNEL);
-               pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
+              PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_START_CHANNEL);
+              pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
 
               sendCmd("start channel:"+pcfChannel,pcfCmd);
-
+              return getReason();
        }
-       public void alterChannel(String pcfChannel,String type,String ipChannel) throws  mqExcept{
+       public int alterChannel(String pcfChannel,String type,String ipChannel) throws  mqExcept{
               alterChannel(pcfChannel,type,ipChannel,null);
+              return getReason();
        }
-       public void alterChannel(String pcfChannel,String type,String ipChannel,String localChannel) throws  mqExcept{
+       public int  alterChannel(String pcfChannel,String type,String ipChannel,String localChannel) throws  mqExcept{
 
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_CHANGE_CHANNEL);
               pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
@@ -150,44 +158,47 @@ public class mq_contrl{
                  pcfCmd.addParameter(MQConstants.MQCACH_LOCAL_ADDRESS,localChannel);
               }
               sendCmd("alter channel:"+pcfChannel,pcfCmd);
-
+              return getReason();
        }
-       public void stopChannel(String pcfChannel,boolean force,boolean is_stop) throws  mqExcept{
+       public int stopChannel(String pcfChannel,boolean force,boolean is_stop) throws  mqExcept{
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_STOP_CHANNEL);
               pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
 
 
               if(force) {
-                pcfCmd.addParameter(MQConstants.MQIACF_MODE, MQConstants.MQMODE_FORCE);
+                 pcfCmd.addParameter(MQConstants.MQIACF_MODE, MQConstants.MQMODE_FORCE);
               }
-              if(is_stop)pcfCmd.addParameter(MQConstants.MQIACH_CHANNEL_STATUS, MQConstants.MQCHS_INACTIVE);
-              else pcfCmd.addParameter(MQConstants.MQIACH_CHANNEL_STATUS, MQConstants.MQCHS_INACTIVE);
+              if(is_stop)pcfCmd.addParameter(MQConstants.MQIACH_CHANNEL_STATUS, MQConstants.MQCHS_STOPPED);
+              else       pcfCmd.addParameter(MQConstants.MQIACH_CHANNEL_STATUS, MQConstants.MQCHS_INACTIVE);
 
               sendCmd("stop channel:"+pcfChannel,pcfCmd);
 
+              return getReason();
        }
-       public void resetChannel(String pcfChannel, int value) throws  mqExcept{
+       public int resetChannel(String pcfChannel, int value) throws  mqExcept{
 
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_RESET_CHANNEL);
               pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
               pcfCmd.addParameter(MQConstants.MQIACH_MSG_SEQUENCE_NUMBER,value);
               sendCmd("reset channel:"+pcfChannel,pcfCmd);
 
+              return getReason();
        }
 
-       public void commitChannel(String pcfChannel) throws  mqExcept{
-                   resolveChannel(pcfChannel,MQConstants.MQIDO_COMMIT);
+       public int commitChannel(String pcfChannel) throws  mqExcept{
+              return resolveChannel(pcfChannel,MQConstants.MQIDO_COMMIT);
        }
-       public void backoutChannel(String pcfChannel) throws  mqExcept{
-                   resolveChannel(pcfChannel,MQConstants.MQIDO_BACKOUT);
+       public int backoutChannel(String pcfChannel) throws  mqExcept{
+              return resolveChannel(pcfChannel,MQConstants.MQIDO_BACKOUT);
        }
-       public void resolveChannel(String pcfChannel, int value) throws  mqExcept{
+       public int resolveChannel(String pcfChannel, int value) throws  mqExcept{
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_RESOLVE_CHANNEL);
               pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
               pcfCmd.addParameter(MQConstants.MQIACH_IN_DOUBT,value);
               sendCmd("resolve channel:"+pcfChannel,pcfCmd);
+              return getReason();
        }
-       public void statusChannel(String pcfChannel) throws  mqExcept{
+       public String statusChannel(String pcfChannel) throws  mqExcept{
               String[] chStatusText = {"INACTIVE", "MQCHS_BINDING", "MQCHS_STARTING", "MQCHS_RUNNING","MQCHS_STOPPING", "MQCHS_RETRYING", "MQCHS_STOPPED", "MQCHS_REQUESTING", "MQCHS_PAUSED","", "", "", "", "MQCHS_INITIALIZING"};
 
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_INQUIRE_CHANNEL_STATUS);
@@ -196,9 +207,15 @@ public class mq_contrl{
               PCFMessage[] pcfResponse = sendCmd("status channel:"+pcfChannel,pcfCmd);
               if((pcfResponse != null) && (pcfResponse.length > 0)) {
                   int          chStatus = ((Integer) (pcfResponse[0].getParameterValue(MQConstants.MQIACH_CHANNEL_STATUS))).intValue();
-                  System.out.println("Channel status is " + chStatusText[chStatus]);
+                  logger.trace("mngr:"+queueManager.getQMName()+" channel:"+pcfChannel+" statusChannel:"+chStatus+" statusChannel:"+chStatusText[chStatus]);
+                  //System.out.println("Channel status is " + chStatusText[chStatus]);
+                  return chStatusText[chStatus];
               }
-              else System.out.println("Channel status is " + chStatusText[0]);
+              else{
+                  logger.trace("mngr:"+queueManager.getQMName()+" channel:"+pcfChannel+" pcfResponse = null");
+              }
+              return chStatusText[0];
+              //else System.out.println("Channel status is " + chStatusText[0]);
        }
        public void displayChannels(String channel_name) throws  mqExcept{
               // Create the PCF message type for the channel names inquire.
@@ -440,7 +457,7 @@ public class mq_contrl{
 
       
               
-       public static void main(String[] args) {
+       public static void main1(String[] args) {
               mq_contrl cntrl=new mq_contrl();
               try {
                    System.out.println("create");
@@ -527,6 +544,52 @@ public class mq_contrl{
                     System.out.println(m);
               }
               */
+              try {
+                   cntrl.close();
+                   System.out.println("close");
+              }
+              catch (mqExcept m){
+                   System.out.println(m);
+              }
+
+       }
+
+       public static void main(String[] args) {
+              mq_contrl cntrl=new mq_contrl();
+              try {
+                   System.out.println("create");
+                   cntrl.open("SBPBACK_SNT_TU","10.70.112.150",2702,"SYSTEM.ADMIN.SVRCONN","av","483886416409");
+                   System.out.println("init");
+                   System.out.println("open");
+              }
+              catch (mqExcept m){
+                    System.out.println(m);
+                    try {cntrl.close();}catch (mqExcept m1){}
+                    return;
+              }
+              
+              String channel="SBP.SVRCONN";
+
+              try {
+                   System.out.println("status:"+channel+" "+cntrl.statusChannel(channel));
+              }
+              catch (mqExcept m){
+                    System.out.println(m);
+              }
+              /*
+              try {
+                    System.out.println("start:"+channel+" "+cntrl.startChannel(channel));
+              }
+              catch (mqExcept m){
+                    System.out.println(m);
+              }
+              */
+              try {
+                   System.out.println("stop:"+channel+" "+cntrl.stopChannel(channel,true,true));
+              }
+              catch (mqExcept m){
+                    System.out.println(m);
+              }
               try {
                    cntrl.close();
                    System.out.println("close");

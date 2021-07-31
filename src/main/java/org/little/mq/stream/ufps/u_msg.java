@@ -2,18 +2,15 @@ package org.little.mq.stream.ufps;
 
 import java.util.ArrayList;
 
-
 public class u_msg {
-       final private static String CLASS_NAME="prj0.stream.u_msg";
-       final private static int    CLASS_ID  =1602;
-             public  static String getClassName(){return CLASS_NAME;}
-             public  static int    getClassId(){return CLASS_ID;}
-             //private static Logger log=new Logger(CLASS_NAME);
+       //final private static String CLASS_NAME="prj0.stream.u_msg";
+       //final private static int    CLASS_ID  =1602;
+       //      public  static String getClassName(){return CLASS_NAME;}
+       //      public  static int    getClassId(){return CLASS_ID;}
+       //      //private static Logger log=new Logger(CLASS_NAME);
 
        private  ufps_sl  sl;
        private  ufps_doc doc;
-     
-
        public u_msg() {
     	      clear();
     	    

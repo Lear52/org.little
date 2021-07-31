@@ -25,15 +25,9 @@ public class fc_control {
               is_set_flag=false;
        }
 
-       //protected String getNameQ   ()         {return cfg.getNameQ();}
-       //protected void   setNameQ   (String q) {cfg.setNameQ(q);}
-       //protected String getNameMngr()         {return cfg.getNameMngr();}
-       //protected void   setNameMngr(String m) {cfg.setNameMngr(m);}
-
-
        public void setState(JSONObject root) {
-           isManual(root.optBoolean("is_manual"));
-           isFlag  (root.optBoolean("is_flag"  ));
+           isManual(root.getBoolean("is_manual"));
+           isFlag  (root.getBoolean("is_flag"  ));
        }
        public JSONObject    getState() {
               JSONObject root=new JSONObject();
@@ -63,7 +57,6 @@ public class fc_control {
        }
        public void init(Node node_cfg) {}
        public    void       work(){}
-       public    void       close(){
-       }
+       public    void       close(){}
 
 }

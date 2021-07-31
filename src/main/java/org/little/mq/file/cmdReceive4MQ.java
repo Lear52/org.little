@@ -4,7 +4,6 @@ import org.little.mq.file.util.connect2MQ;
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
 
-
 public class cmdReceive4MQ implements cmdElement{
        private static final Logger log = LoggerFactory.getLogger(cmdReceive4MQ.class);
        public  static String getClassName(){return cmdReceive4MQ.class.getName();}

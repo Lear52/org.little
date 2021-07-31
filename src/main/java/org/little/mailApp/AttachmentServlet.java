@@ -1,9 +1,15 @@
 package org.little.mailApp;
 
-import java.io.*;
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.servlet.*;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Part;
+import javax.mail.internet.ContentType;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

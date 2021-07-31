@@ -1,6 +1,5 @@
 package org.little.mq.file;
 
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;

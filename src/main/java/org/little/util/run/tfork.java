@@ -7,6 +7,8 @@ package org.little.util.run;
 
 import org.little.util.Logger;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 //------------------------------------------------
 /**
  * @author av
@@ -22,15 +24,19 @@ public class tfork implements Runnable{
 
 
        // Системный потокдля запуска задач в паралель
-       protected Thread             process_tread = null;
+       protected Thread             process_tread;
        // Общий флаг работы пула потоков
-       protected boolean            is_run        = false;
- 
+       protected boolean            is_run;
+
+       protected AtomicBoolean      is_Run; 
+
        public void init() {}
 
        public void clear(){
               is_run=false;
               process_tread=null;
+              is_Run = new AtomicBoolean(false); 
+              
        }
 
        public tfork(){ clear();}

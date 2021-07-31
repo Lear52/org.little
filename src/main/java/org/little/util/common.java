@@ -1,5 +1,5 @@
 package org.little.util;
-
+        
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -52,17 +52,17 @@ public class common {
     public void         initMBean(){ }
 
     public boolean loadCFG(){
-          DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-         try {
-              DocumentBuilder builder;
-              builder  = factory.newDocumentBuilder();
-              doc      = builder.parse(cfg_filename);
+           DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+           try {
+                DocumentBuilder builder;
+                builder  = factory.newDocumentBuilder();
+                doc      = builder.parse(cfg_filename);
                 logger.trace("open doc:"+cfg_filename);
-              //doc.getFirstChild().getNodeValue();
-              node_cfg = doc.getFirstChild();              
-
+                //doc.getFirstChild().getNodeValue();
+                node_cfg = doc.getFirstChild();              
+               
                 logger.trace("compare node name:"+node_cfg.getNodeName()+" with name:"+getOldNodeName()+" or "+getNodeName()+" or "+getDefNodeName());
-
+               
                 if(getOldNodeName().equals(node_cfg.getNodeName())){
                    logger.info("config structure OLD name:"+getOldNodeName());
                    return true;
@@ -79,6 +79,7 @@ public class common {
                        Node n=glist.item(i);
                        if(getNodeName().equals(n.getNodeName())){
                           node_cfg=n;
+                          logger.trace("set topic name:"+node_cfg.getNodeName());
                           return true;
                        }
                    }
@@ -89,11 +90,10 @@ public class common {
                 logger.error("can't find config structure name:"+getNodeName()+" in config file:"+cfg_filename);
                 node_cfg = null;
                 return false;
-          } 
-         catch (Exception e) {
-                 logger.error("Could not load xml config file:"+cfg_filename, e);
-                 return false;
-         }
+           }catch (Exception e) {
+                   logger.error("Could not load xml config file:"+cfg_filename, e);
+                   return false;
+           }
          //return true;
     }
 

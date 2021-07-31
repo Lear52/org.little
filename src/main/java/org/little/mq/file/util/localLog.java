@@ -36,7 +36,7 @@ public class localLog{
                   file.flush();
               } 
               catch (IOException e) {}
-       return ;
+       
        }
        public boolean open(String _filename) {
               try{
@@ -57,6 +57,5 @@ public class localLog{
               clear();
               return ;
        }
-
  
 }

@@ -125,16 +125,17 @@ public class mq_contrl_jms extends mq_contrl{
                return pcfResponse;
 
        }
-       public void startChannel(String pcfChannel) throws  mqExcept{
+       public int startChannel(String pcfChannel) throws  mqExcept{
 
                PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_START_CHANNEL);
                pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
 
               sendCmd("start channel:"+pcfChannel,pcfCmd);
 
+              return getReason();
        }
-       public void alterChannel(String pcfChannel,String type,String ipChannel) throws  mqExcept{
-              alterChannel(pcfChannel,type,ipChannel,null);
+       public int alterChannel(String pcfChannel,String type,String ipChannel) throws  mqExcept{
+              return alterChannel(pcfChannel,type,ipChannel,null);
        }
        private int  typeChannel(String pcfChannel){
               if("SENDER"   .equals(pcfChannel))return MQConstants.MQCHT_SENDER   ;
@@ -147,7 +148,7 @@ public class mq_contrl_jms extends mq_contrl{
               if("CLUSSDR"  .equals(pcfChannel))return MQConstants.MQCHT_CLUSSDR  ;
               return MQConstants.MQCHT_SENDER;
        }
-       public void alterChannel(String pcfChannel,String type,String ipChannel,String localChannel) throws  mqExcept{
+       public int alterChannel(String pcfChannel,String type,String ipChannel,String localChannel) throws  mqExcept{
 
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_CHANGE_CHANNEL);
               pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
@@ -159,8 +160,9 @@ public class mq_contrl_jms extends mq_contrl{
               }
               sendCmd("alter channel:"+pcfChannel,pcfCmd);
 
+              return getReason();
        }
-       public void stopChannel(String pcfChannel,boolean force,boolean is_stop) throws  mqExcept{
+       public int stopChannel(String pcfChannel,boolean force,boolean is_stop) throws  mqExcept{
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_STOP_CHANNEL);
               pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
 
@@ -173,30 +175,32 @@ public class mq_contrl_jms extends mq_contrl{
 
               sendCmd("stop channel:"+pcfChannel,pcfCmd);
 
+              return getReason();
        }
-       public void resetChannel(String pcfChannel, int value) throws  mqExcept{
+       public int resetChannel(String pcfChannel, int value) throws  mqExcept{
 
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_RESET_CHANNEL);
               pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
               pcfCmd.addParameter(MQConstants.MQIACH_MSG_SEQUENCE_NUMBER,value);
               sendCmd("reset channel:"+pcfChannel,pcfCmd);
 
-
+              return getReason();
        }
 
-       public void commitChannel(String pcfChannel) throws  mqExcept{
-                   resolveChannel(pcfChannel,MQConstants.MQIDO_COMMIT);
+       public int commitChannel(String pcfChannel) throws  mqExcept{
+              return resolveChannel(pcfChannel,MQConstants.MQIDO_COMMIT);
        }
-       public void backoutChannel(String pcfChannel) throws  mqExcept{
-                   resolveChannel(pcfChannel,MQConstants.MQIDO_BACKOUT);
+       public int backoutChannel(String pcfChannel) throws  mqExcept{
+              return resolveChannel(pcfChannel,MQConstants.MQIDO_BACKOUT);
        }
-       public void resolveChannel(String pcfChannel, int value) throws  mqExcept{
+       public int resolveChannel(String pcfChannel, int value) throws  mqExcept{
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_RESOLVE_CHANNEL);
               pcfCmd.addParameter(MQConstants.MQCACH_CHANNEL_NAME, pcfChannel);
               pcfCmd.addParameter(MQConstants.MQIACH_IN_DOUBT,value);
               sendCmd("resolve channel:"+pcfChannel,pcfCmd);
+              return getReason();
        }
-       public void statusChannel(String pcfChannel) throws  mqExcept{
+       public String statusChannel(String pcfChannel) throws  mqExcept{
               String[] chStatusText = {"INACTIVE", "MQCHS_BINDING", "MQCHS_STARTING", "MQCHS_RUNNING","MQCHS_STOPPING", "MQCHS_RETRYING", "MQCHS_STOPPED", "MQCHS_REQUESTING", "MQCHS_PAUSED","", "", "", "", "MQCHS_INITIALIZING"};
 
               PCFMessage pcfCmd = new PCFMessage(MQConstants.MQCMD_INQUIRE_CHANNEL_STATUS);
@@ -205,9 +209,11 @@ public class mq_contrl_jms extends mq_contrl{
               PCFMessage[] pcfResponse = sendCmd("status channel:"+pcfChannel,pcfCmd);
               if((pcfResponse != null) && (pcfResponse.length > 0)) {
                   int          chStatus = ((Integer) (pcfResponse[0].getParameterValue(MQConstants.MQIACH_CHANNEL_STATUS))).intValue();
-                  System.out.println("Channel status is " + chStatusText[chStatus]);
+                  //System.out.println("Channel status is " + chStatusText[chStatus]);
+                  return chStatusText[chStatus];
               }
-              else System.out.println("Channel status is " + chStatusText[0]);
+              //else System.out.println("Channel status is " + chStatusText[0]);
+              return chStatusText[0];
        }
        public void displayChannels(String channel_name) throws  mqExcept{
               // Create the PCF message type for the channel names inquire.

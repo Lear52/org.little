@@ -1,14 +1,13 @@
 package org.little.syslog.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.productivity.java.syslog4j.server.SyslogServerEventIF;
+import org.little.util.Except;
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
-import org.little.util.Except;
+import org.productivity.java.syslog4j.server.SyslogServerEventIF;
 
 /**
  * Simple implementation of rfc5424 syslog message format (c.f.
@@ -19,7 +18,7 @@ public class Rfc5424Event implements SyslogServerEventIF {
        private static Logger logger = LoggerFactory.getLogger(Rfc5424Event.class);
 
        private static final long serialVersionUID = 1L;
-       private static final char SP = ' ';
+       //private static final char SP = ' ';
        private static final String CHARSET = "UTF-8";
        private static final String NIL = "-";
        private static final byte[] UTF_8_BOM = { (byte) 0xef, (byte) 0xbb, (byte) 0xbf };

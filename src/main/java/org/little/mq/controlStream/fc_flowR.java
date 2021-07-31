@@ -13,21 +13,8 @@ public class fc_flowR extends fc_flow{
 
        @Override
        public JSONObject getStat(){
-              JSONObject root=new JSONObject();
-              root.put("id", getID());
-              root.put("name", getName());
-              root.put("alarm", isAlarm());
-              root.put("type", "flow");
-              JSONArray  list=new JSONArray();
-              for(int i=0;i<q_list.size();i++) {
-                  fc_Q q=q_list.get(i);
-                  list.put(i,q.getState());
-              }
-              root.put("list"   , list);
-              root.put("control", flow_contrl.getState());
-
-              logger.trace("getStat json:"+root); 
-
+ 	      JSONObject root= _getStat();  	   
+              logger.trace("fc_flowR getStat():"+root);
               return root;
        }
 
@@ -54,7 +41,8 @@ public class fc_flowR extends fc_flow{
                     setName(root.getString("name"));
                     isAlarm(root.getBoolean("alarm"));
 
-                    JSONArray  list=root.optJSONArray("list");
+                    JSONArray  list=root.getJSONArray("list_queue");
+
                     for(int i=0;i<list.length();i++) {
                         fc_Q q=new fc_Q();
                         JSONObject q_json=list.getJSONObject(i);
@@ -63,6 +51,10 @@ public class fc_flowR extends fc_flow{
                     }
                     JSONObject f_ctrl=root.getJSONObject("control");
                     if(f_ctrl!=null)flow_contrl.setState(f_ctrl);
+
+                    JSONObject f_chnl=root.getJSONObject("channel");
+                    if(f_chnl!=null)flow_channel.setState(f_chnl);
+
                  }
                  catch(Exception e){
                        logger.trace("setStat json:"+root+" ex:"+new Except("",e)); 
@@ -78,6 +70,17 @@ public class fc_flowR extends fc_flow{
                  return root;
        }
        @Override
+       protected JSONObject      setChannel(boolean is_run) {
+                 flow_channel.controlChannel(is_run);
+                 JSONObject root=new JSONObject();
+                 root.put("id", getID());
+                 root.put("name", getName());
+                 root.put("channel", flow_channel.getState());
+                 return root;
+       }
+ 
+       @Override
        public void init(Node n) {}
+
        
 }

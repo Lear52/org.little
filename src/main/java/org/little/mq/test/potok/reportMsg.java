@@ -47,11 +47,6 @@ public class reportMsg {
        public void closeQ(query q) throws dbExcept {
               q.closePreSt();
        }
-       //public void execQ(query q) throws dbExcept {
-       //       q.executeUpdate();
-       //}
-                                
-
        public void setQ(query q) throws dbExcept {
 
               q.setString   (1, getID       () );                             

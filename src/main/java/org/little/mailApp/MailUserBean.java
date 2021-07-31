@@ -1,8 +1,14 @@
 package org.little.mailApp;
 
-import java.util.*;
-import javax.mail.*;
-import javax.naming.*;
+import java.util.Properties;
+
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.URLName;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 /**
  * This JavaBean is used to store mail user information.

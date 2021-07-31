@@ -1,13 +1,12 @@
 package org.little.mq.stream;
 
 
-//import prj0.util.Logger;
 
 public class def{
-       final private static String CLASS_NAME="org.little.stream.def";
-       final private static int    CLASS_ID  =1604;
-	          public  static String getClassName(){return CLASS_NAME;}
-             public  static int    getClassId(){return CLASS_ID;}
+       //final private static String CLASS_NAME="org.little.stream.def";
+       //final private static int    CLASS_ID  =1604;
+	     //     public  static String getClassName(){return CLASS_NAME;}
+           //  public  static int    getClassId(){return CLASS_ID;}
              //private static Logger log=new Logger(CLASS_NAME);
 
   public static final java.lang.String CNFGQUEUE                            = "SYSTEM.STREAM.CONFIG";

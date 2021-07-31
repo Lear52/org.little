@@ -1,6 +1,5 @@
 package org.little.mq.controlStream;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
@@ -10,32 +9,18 @@ import org.w3c.dom.NodeList;
 public class fc_flowL  extends fc_flow{
        private static final Logger logger = LoggerFactory.getLogger(fc_flowL.class);
        private Object  lock;
-       private fc_mngr mngr;
+       private fc_node node;
 
-       public fc_flowL(fc_mngr _mngr) {
+       public fc_flowL(fc_node _node) {
               clear();
               lock=new Object();
               flow_contrl=new fc_control();              
-              mngr=_mngr;
+              node=_node;
        }
-       @Override
+       @Override 
        public JSONObject getStat() {
-              JSONObject root=new JSONObject();
-              root.put("type", "flow");
-              root.put("id", getID());
-              root.put("name", getName());
-              JSONArray  list=new JSONArray();
-              for(int i=0;i<q_list.size();i++) {
-                  fc_Q q=q_list.get(i);
-                  list.put(i,q.getState());
-              }
-              root.put("alarm"  , isAlarm());
-              root.put("list"   , list);
-              root.put("size"   , q_list.size());
-              root.put("control", flow_contrl.getState());
-
-              logger.trace("fc_flowL getStat() size:"+q_list.size());
-
+    	      JSONObject root= _getStat();  	   
+              logger.trace("fc_flowL getStat():"+root);
               return root;
        }
 
@@ -47,9 +32,10 @@ public class fc_flowL  extends fc_flow{
                        fc_Q q=q_list.get(i);
                        q.work();
                    }
-
                    flow_contrl.work();
+                   flow_channel.work();
 
+                   
                    if(isAlarm()){
                       int len=0;
                       for(int i=0;i<q_list.size();i++) {
@@ -58,7 +44,7 @@ public class fc_flowL  extends fc_flow{
                       }
                       if(len==0){
                          isAlarm(false);
-                         if(mngr.isControlStream())flow_contrl.setFlag(fc_control.RUN);
+                         if(node.isControlStream())flow_contrl.setFlag(fc_control.RUN);
                       }
                    }
                    else{
@@ -67,9 +53,16 @@ public class fc_flowL  extends fc_flow{
                           fc_Q q=q_list.get(i);
                           if(q.isAlarm()){is_alarm=true;break;}
                       }
+                      if(is_alarm==false)setTimeAlarm(0);
+                      else {
+                          for(int i=0;i<q_list.size();i++) {
+                              fc_Q q=q_list.get(i);
+                              if(q.getTimeAlarm()>getTimeAlarm())setTimeAlarm(q.getTimeAlarm());
+                          }
+                      }
                       isAlarm(is_alarm);
 
-                      if(is_alarm && mngr.isControlStream()){
+                      if(is_alarm && node.isControlStream()){
                          flow_contrl.setFlag(fc_control.STOP);
                       }
                    }
@@ -79,8 +72,18 @@ public class fc_flowL  extends fc_flow{
        }
        
        @Override
-       protected JSONObject setFlag(boolean flag) {JSONObject ret=flow_contrl.setFlag(flag); work();return ret;}
-
+       protected JSONObject setFlag(boolean flag) {
+                 JSONObject ret=flow_contrl.setFlag(flag); 
+                 work();
+                 return ret;
+       }
+       @Override
+       protected JSONObject      setChannel(boolean is_run) {
+                 JSONObject ret=flow_channel.setChannel(is_run); 
+                 work();
+                 //flow_channel.work();
+                 return ret;
+       }
 
        @Override
        protected JSONObject ClearQ(String mngr_id,String q_id){
@@ -130,18 +133,23 @@ public class fc_flowL  extends fc_flow{
                      flow_contrl=new fc_controlL();
                      flow_contrl.init(n);
                   }
+                  else
+                  if("channel".equalsIgnoreCase(n.getNodeName()) ){           
+                     flow_channel=new fc_channelL();
+                     flow_channel.init(n);
+                  }
                          
               }
-                 
-                 
                  
        }
        @Override
        public    void close() {
                  super.close();
                  if(flow_contrl!=null)flow_contrl.close();
+                 if(flow_channel!=null)flow_channel.close();
                  flow_contrl=null;
-                 mngr=null;
+                 flow_channel=null;
+                 node=null;
        }
        
 }

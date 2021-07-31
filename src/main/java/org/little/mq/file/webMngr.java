@@ -72,17 +72,11 @@ public class webMngr extends webRun{
               //if(page==null)page = commonSyslog.get().getDefPage();
               logger.trace("webMngr.doRun() page:"+page);
               //-----------------------------------------------------------------------------------------
-              if(page!=null)
+              //if(page!=null)
               try {
-                   RequestDispatcher d         = null;
-                   ServletContext servlet_cntx = null;
-                   ServletConfig servlet_cfg   = null;
-              
-                   servlet_cfg  = getServletConfig();
-              
-                   servlet_cntx = servlet_cfg.getServletContext();
-              
-                   d = servlet_cntx.getRequestDispatcher(page);
+                   ServletConfig servlet_cfg  = getServletConfig();
+                   ServletContext servlet_cntx = servlet_cfg.getServletContext();
+                   RequestDispatcher d = servlet_cntx.getRequestDispatcher(page);
               
                    d.forward(request, response);
               } catch (Exception ex) {

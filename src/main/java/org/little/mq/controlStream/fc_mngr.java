@@ -1,5 +1,5 @@
 package org.little.mq.controlStream;
-              
+                     
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -16,30 +16,29 @@ public class fc_mngr  extends task{
        private static final Logger logger = LoggerFactory.getLogger(fc_mngr.class);
 
        private fc_common           cfg;
-       private ArrayList<fc_group> group_list;
+       private ArrayList<fc_node>  node_list;
        private ArrayList<task>     task_list;
-       private int                 count_active_group;
-       private int                 task_timeout;
-       private boolean             is_control_stream;
-       private String              default_page;   
-       private int                 min_count_group;
        private static Object       LOCK=new Object();   
-
+       private String              default_page;   
+       private int                 task_timeout;
        public fc_mngr() {
               cfg               =new fc_common();
-              group_list        =new ArrayList<fc_group>();
+              node_list         =new ArrayList<fc_node>();
               task_list         =new ArrayList<task>();
-              count_active_group=0;
-              is_control_stream =false;
+              default_page      ="index.jsp";
               task_timeout      =10;
-              default_page      ="index.html";
-              min_count_group   =2;
        }
+       protected String             getDefaulPage() {return default_page;}
+       protected ArrayList<fc_node> getListNode  () {return node_list;}
+       public    int                getTimeout   (){return task_timeout;}
+       public    ArrayList<task>    getListTask  () {return task_list;       }
+
        public boolean loadCFG(String xpath){
               return cfg.loadCFG(xpath);
        }
        public void init() {
-            init(cfg.getNode());
+              logger.info("init node:"+cfg.getNode().getNodeName());
+              init(cfg.getNode());
        }
        
        /**
@@ -55,17 +54,11 @@ public class fc_mngr  extends task{
                if(glist==null) return;
                for(int i=0;i<glist.getLength();i++){
                    Node n=glist.item(i);
-                   if("default_page".equalsIgnoreCase(n.getNodeName()) ){           
-                      default_page=n.getTextContent();logger.info("default_page:"+default_page);
-                   }else
                    if("run_timeout".equalsIgnoreCase(n.getNodeName()) ){           
                       String s=n.getTextContent();try{task_timeout=Integer.parseInt(s,10);}catch(Exception e){logger.error("error set run_timeout:"+s);task_timeout=10;}logger.info("run_timeout:"+task_timeout);
                    }else
-                   if("control_stream".equalsIgnoreCase(n.getNodeName()) ){           
-                      String s=n.getTextContent();try{is_control_stream=Boolean.parseBoolean(s);}catch(Exception e){logger.error("error set control_stream:"+s);is_control_stream=false;}logger.info("control_stream:"+is_control_stream);
-                   }else
-                   if("min_count_group".equalsIgnoreCase(n.getNodeName()) ){           
-                      String s=n.getTextContent();try{min_count_group=Integer.parseInt(s,10);}catch(Exception e){logger.error("error set min_count_group:"+s);min_count_group=2;}logger.info("min_count_group:"+min_count_group);
+                   if("default_page".equalsIgnoreCase(n.getNodeName()) ){           
+                      default_page=n.getTextContent();logger.info("default_page:"+default_page);
                    }
                }
        }
@@ -76,9 +69,8 @@ public class fc_mngr  extends task{
        private void init(Node _node_cfg) {
               if(_node_cfg==null)return;
 
-              group_list=new ArrayList<fc_group>();
-              task_list =new ArrayList<task>();
-
+              node_list         =new ArrayList<fc_node>();
+              task_list         =new ArrayList<task>();
               logger.info("The configuration node:"+_node_cfg.getNodeName());
               NodeList glist=_node_cfg.getChildNodes();
 
@@ -89,140 +81,181 @@ public class fc_mngr  extends task{
                   if("global".equalsIgnoreCase(n.getNodeName()) ){
                      init_global(n);
                   }
-                  if("local".equalsIgnoreCase(n.getNodeName()) ){
-                     fc_groupL fc_grp=new fc_groupL(this);
-                     fc_grp.init(n);
-                     group_list.add(fc_grp);
-                     task_list.add(fc_grp);
-                  }
-                  else
-                  if("remote".equalsIgnoreCase(n.getNodeName())){
-                     fc_groupR fc_grp=new fc_groupR();
-                     fc_grp.init(n);
-                     group_list.add(fc_grp);
-                     task_list.add(fc_grp);
+                  if("node".equalsIgnoreCase(n.getNodeName()) ){
+                     fc_node fc_nd=new fc_node(this);
+                     fc_nd.init(n,task_list);
+                     node_list.add(fc_nd);
                   }
               }
               
        }
-       
-       protected String getDefaulPage() {return default_page;}
-       public int       getActive() {return count_active_group;}
-       public boolean   isControlStream() {return is_control_stream && ((getActive()-getMinCountGroup())>=0);}
-       public int       getTimeout() {return task_timeout;}
-       public int       getMinCountGroup(){return min_count_group;}
+       public void close() {
+              if(node_list!=null){
+                 for(int i=0;i<node_list.size();i++) {
+                     fc_node nd=node_list.get(i);
+                     nd.close();
+                 }       
+                 node_list.clear();
+              }
+              node_list=null;
 
+       }
+       
+       /**
+         get number active flow
+
+       */
        @Override
        public void work() {
               synchronized(LOCK){
-                  int _count=0;
-                  for(int i=0;i<group_list.size();i++) {
-                      fc_group gr=group_list.get(i);
-                      if(gr.getStateGroup())_count++;
+                  for(int i=0;i<node_list.size();i++) {
+                      fc_node nd=node_list.get(i);
+                      nd.work();
                   }       
-                  count_active_group=_count;
               }
        }
-       public void close() {
-              if(group_list!=null){
-                 for(int i=0;i<group_list.size();i++) {
-                     fc_group gr=group_list.get(i);
-                     gr.close();
-                 }       
-                 group_list.clear();
-              }
-              group_list=null;
 
-       }
-       
-       public ArrayList<task> getListTask() {return task_list;}
-
-       public JSONObject ClearQ(String group_id,String flow_id,String mngr_id,String q_id){
-              JSONObject root=new JSONObject();
-              root.put("type", "clear");
-              for(int i=0;i<group_list.size();i++){
-                  if(group_list.get(i).getID().equalsIgnoreCase(group_id)) {
-                     JSONObject ret=group_list.get(i).ClearQ(flow_id,mngr_id,q_id); 
-                     root.put("resp", ret);
-                     break;
-                  }
-              }
-              return root;
-       }
-       public JSONObject setFlag(String group_id,String flow_id,boolean is_flag) {
-              JSONObject root=new JSONObject();
-              root.put("type", "flag");
-              for(int i=0;i<group_list.size();i++){
-                  if(group_list.get(i).getID().equalsIgnoreCase(group_id)) {
-                     JSONObject ret=group_list.get(i).setFlag(flow_id,is_flag); 
-                     root.put("resp", ret);
-                     break;
-                  }
-              }
-
-
-              return root;
-       }
        /**
-              local group to JSON 
+         executed command get state all node
        */
-       public JSONObject getStat() {
-              JSONObject root=new JSONObject();
-              JSONArray  list=new JSONArray();
-              root.put("type", "local state");
-              int count=0;
-              for(int i=0;i<group_list.size();i++) {
-                  fc_group group=group_list.get(i);
-                  if(group instanceof fc_groupL){
-                     list.put(count,group.getStat());
-                     count++;
-                  }
-              }
-              root.put("list", list);
-              root.put("size", count);
-
-              logger.trace("fc_mnmr getStat() group_list.size(local):"+count+" group_list.size(all):"+group_list.size());
-              
-              return root;
-       }
        public JSONObject getStatAll() {
               JSONObject root=new JSONObject();
               JSONArray  list=new JSONArray();
               root.put("type", "all");
-              for(int i=0;i<group_list.size();i++) {
-                  fc_group group=group_list.get(i);
-                  list.put(i,group.getStat());
+              for(int i=0;i<node_list.size();i++) {
+                  fc_node node=node_list.get(i);
+                  list.put(i,node.getStatAll());
               }
-              root.put("list"   , list);
-              root.put("active" , getActive());
-              root.put("auto"   , isControlStream());
-              root.put("timeout", task_timeout);
-              root.put("size"   , group_list.size());
+              root.put("list_node" , list);
 
-              logger.trace("fc_mnmr getStat() size:"+group_list.size());
+              logger.trace("fc_mnmr getStat() size:"+node_list.size());
               
               return root;
        }
+       /**
+          executed command get state local group
 
+       */
+       public JSONObject getLocalStat() {
+              JSONObject root=new JSONObject();
+              JSONArray  list=new JSONArray();
+              root.put("type", "local state");
+              int count=0;
+              for(int i=0;i<node_list.size();i++) {
+                  fc_node node=node_list.get(i);
+                  list.put(count,node.getLocalStat());
+                  count++;
+              }
+              root.put("list_node", list);
+              root.put("size"     , count);
+             
+              logger.trace("fc_mnmr getStat() group_list.size(local):"+count+" group_list.size(all):"+node_list.size());
+              
+              return root;
+       }
+       /**
+          executed command set flag headbeat 
+          node_id
+          group_id
+          flow_id
+          is_flag - true                false
+       */
+       public JSONObject setFlag(String node_id, String group_id, String flow_id, boolean is_flag) {
+              JSONObject root=new JSONObject();
+              root.put("type", "flag");
+              for(int i=0;i<node_list.size();i++){
+                  if(node_list.get(i).getID().equalsIgnoreCase(node_id)) {
+                     JSONObject ret=node_list.get(i).setFlag(group_id,flow_id,is_flag); 
+                     root.put("resp", ret);
+                     break;
+                  }
+              }
+              return root;
+       }
+       public JSONObject setFlagAll(String node_id, boolean is_flag) {
+              JSONObject root=new JSONObject();
+              root.put("type", "flag");
+              for(int i=0;i<node_list.size();i++){
+                  if(node_list.get(i).getID().equalsIgnoreCase(node_id)) {
+                     JSONObject ret=node_list.get(i).setFlagAll(is_flag); 
+                     root.put("resp", ret);
+                     break;
+                  }
+              }
+              return root;
+       }
+       public JSONObject setChannel(String node_id, String group_id, String flow_id, boolean is_run) {
+              JSONObject root=new JSONObject();
+              root.put("type", "channel");
+              logger.trace("setChannel");
+              for(int i=0;i<node_list.size();i++){
+                  if(node_list.get(i).getID().equalsIgnoreCase(node_id)) {
+                     logger.trace("setChannel:"+node_id);
+                     JSONObject ret=node_list.get(i).setChannel(group_id,flow_id,is_run); 
+                     root.put("resp", ret);
+                     break;
+                  }
+              }
+              logger.trace("setChannel");
+              return root;
+       }
+       public JSONObject setChannelAll(String node_id, boolean is_run) {
+              JSONObject root=new JSONObject();
+              root.put("type", "channel");
+              logger.trace("setChannel");
+              for(int i=0;i<node_list.size();i++){
+                  if(node_list.get(i).getID().equalsIgnoreCase(node_id)) {
+                     logger.trace("setChannel:"+node_id);
+                     JSONObject ret=node_list.get(i).setChannelAll(is_run); 
+                     root.put("resp", ret);
+                     break;
+                  }
+              }
+              logger.trace("setChannel");
+              return root;
+       }
+       /**
+          executed command clear queue
+          node_id
+          group_id
+          flow_id
+          mngr_id
+          q_id
+
+       */
+       public JSONObject ClearQ(String node_id, String group_id, String flow_id, String mngr_id, String q_id) {
+              JSONObject root=new JSONObject();
+              root.put("type", "clear");
+              for(int i=0;i<node_list.size();i++){
+                  if(node_list.get(i).getID().equalsIgnoreCase(node_id)) {
+                     JSONObject ret=node_list.get(i).ClearQ(group_id,flow_id,mngr_id,q_id); 
+                     root.put("resp", ret);
+                     break;
+                  }
+              }
+              return root;
+       }
        public static void main(String args[]){
-              fc_mngr mngr=new fc_mngr();
+              fc_mngr _mngr=new fc_mngr();
               String xpath=args[0];
 
-              if(mngr.loadCFG(xpath)==false){
+              if(_mngr.loadCFG(xpath)==false){
                  logger.error("error read config file:"+xpath);
                  return;
               }
               logger.info("START LITTLE.CONTROLSTREAM "+common.ver());
-              mngr.init();
+              _mngr.init();
+
               logger.info("RUN LITTLE.CONTROLSTREAM "+common.ver());
               scheduler runner = new scheduler(10);
 
-              ArrayList<task> _task=mngr.getListTask();
-              runner.add(mngr);
-              for(int i=0;i<_task.size();i++)runner.add(_task.get(i));
+              ArrayList<fc_node> _nd=_mngr.getListNode();
+              runner.add(_mngr);
+              for(int i=0;i<_nd.size();i++)runner.add(_nd.get(i));
               
               runner.fork();
               //mngr.run();
 
        }
+       
 }

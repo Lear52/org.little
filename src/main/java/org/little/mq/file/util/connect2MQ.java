@@ -12,7 +12,6 @@ import org.little.util.LoggerFactory;
 
 import com.ibm.mq.MQException;
 
-
 public class connect2MQ{
        private static final Logger log = LoggerFactory.getLogger(connect2MQ.class);
        public  static String getClassName(){return connect2MQ.class.getName();}

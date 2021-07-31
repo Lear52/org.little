@@ -1,20 +1,29 @@
 package org.little.http;
-
+       
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -27,34 +36,88 @@ import org.little.util.LoggerFactory;
 
 public class lHttpCLN {
        private static final Logger logger = LoggerFactory.getLogger(lHttpCLN.class);
+       private String      username;
+       private String      password;
+       private URI         uri;
+       CloseableHttpClient httpclient;
+       HttpClientContext   context;
 
+       public lHttpCLN() throws URISyntaxException{
+              //debug     =true;
+              String url ="http://localhost:8080/";
+              username   =null;
+              password   =null;
+              httpclient =null;
+              context    =null;
+              uri        =new URI(url);
+       }
+       public lHttpCLN(String _url) throws URISyntaxException{
+              username   =null;
+              password   =null;
+              httpclient =null;
+              context    =null;
+              uri        =new URI(_url);
+       }
+       public lHttpCLN(String _url,String u,String p) throws URISyntaxException{
+              httpclient =null;
+              context    =null;
+              uri        =new URI(_url);
 
-       private String  url     ;
-       private boolean debug   ;
+              setUser(u);
+              setPassword(p);
+       }
+       public void setURL(String _url) throws URISyntaxException  {uri=new URI(_url); }
+       public void setUser(String u)    {this.username = u;}
+       public void setPassword(String p){this.password = p;}
 
-       public lHttpCLN(){
-              debug   = true;
-              url       ="http://localhost:8080/upload.php";
+       private void _open(){
+               httpclient =null;
+               context   =null;
+               if(username!=null && password!=null) {
+                       CredentialsProvider         provider    = new BasicCredentialsProvider();
+                       UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+                       provider.setCredentials(AuthScope.ANY, credentials);
+                       httpclient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
+                       HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+                       AuthCache authCache = new BasicAuthCache();
+                       authCache.put(targetHost, new BasicScheme());
+                       context = HttpClientContext.create();
+                       context.setCredentialsProvider(provider);
+                       context.setAuthCache(authCache);                      
+               }else { 
+                     httpclient = HttpClientBuilder.create().build();
+               }
        }
-       public lHttpCLN(String _url){
-              debug   = false;
-              url     =_url;
+       private void _close() {
+               if(httpclient!=null)try {httpclient.close();} catch (IOException e) {}
        }
-       public void setURL(String url) {
-              this.url = url;
-       }
+
        public String get(ByteArrayOutputStream os) throws Exception{
-              CloseableHttpClient httpclient =null;
+              //CloseableHttpClient httpclient =null;
               try {
-                   httpclient = HttpClientBuilder.create().build();
-                   HttpGet               http_get = new HttpGet(url);
+            	  /*
+                   if(username!=null && password!=null) {
+                      CredentialsProvider provider = new BasicCredentialsProvider();
+                      UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+                      //new AuthScope("www.verisign.com", 443, "realm")
+                      provider.setCredentials(AuthScope.ANY, credentials);
+                      httpclient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
+                   }else { 
+                      httpclient = HttpClientBuilder.create().build();
+                   }
+                   */
+                   _open();
+                   HttpGet http_get = new HttpGet(uri);
+                   //HttpGet http_get = new HttpGet(url);
+                   //http_get.setDoAuthentication( true );
+                   
                    CloseableHttpResponse response = null;
                    InputStream is=null;
                    try {
                         response = httpclient.execute(http_get);
                         HttpEntity ent = response.getEntity();
                         if(ent==null) {
-                            return null;	
+                            return null;       
                         }
                         is = response.getEntity().getContent();
                         while(true) {
@@ -73,8 +136,8 @@ public class lHttpCLN {
                    }
       
               } finally {
-                 httpclient.close();
-
+                 //httpclient.close();
+                 _close();
                  os.close();
               }
               return null;
@@ -83,32 +146,54 @@ public class lHttpCLN {
        public JSONObject getJSON() throws Exception{
               ByteArrayOutputStream os        =new ByteArrayOutputStream();
               JSONObject            json_root =null;
-              CloseableHttpClient   httpclient=null;
-
+              //CloseableHttpClient   httpclient=null;
+              //HttpClientContext     context   =null;
               logger.trace("begin get json");
+              //HttpGet               http_get = new HttpGet(url);
+              HttpGet               http_get = new HttpGet(uri);
 
               try {
-                   httpclient = HttpClientBuilder.create().build();
-                   HttpGet               http_get = new HttpGet(url);
+            	  _open();
+            	  /*
+                   if(username!=null && password!=null) {
+                      CredentialsProvider         provider    = new BasicCredentialsProvider();
+                      UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+
+                      //AuthScope a=new AuthScope("www.verisign.com", 443, "realm");
+                      provider.setCredentials(AuthScope.ANY, credentials);
+                      httpclient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
+                      URI uri = http_get.getURI();
+                      HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+                      AuthCache authCache = new BasicAuthCache();
+                      authCache.put(targetHost, new BasicScheme());
+                      context = HttpClientContext.create();
+                      context.setCredentialsProvider(provider);
+                      context.setAuthCache(authCache);                      
+                      
+                   }else { 
+                      httpclient = HttpClientBuilder.create().build();
+                   }
+                   */
                    CloseableHttpResponse response = null;
                    InputStream           is=null;
 
-                   logger.trace("get httpclient");
+                   //logger.trace("get httpclient");
 
                    try {
-                        response = httpclient.execute(http_get);
+                        if(context!=null) response = httpclient.execute(http_get,context);
+                        else              response = httpclient.execute(http_get);
                         if(response==null){
                            return null;
                         }
                         int status = response.getStatusLine().getStatusCode();
                         if (status < 200 || status > 300) {
                             logger.error("httpclient execute code:"+status);
-                        	return null;
+                            return null;
                         }
                         logger.trace("httpclient execute code:"+status);
                         HttpEntity ent = response.getEntity();
                         if(ent==null) {
-                           return null;	
+                           return null;       
                         }
                         is = ent.getContent();
                         while(true) {
@@ -125,24 +210,25 @@ public class lHttpCLN {
                            if(response!=null)response.close();
                        }
                        catch(Exception e1){
-                             logger.trace("ex: "+new Except("httpclient.close",e1));
+                             logger.error("ex: "+new Except("httpclient.close",e1));
                              return null;
                        }
                    }
       
               }
               catch(Exception e){
-                 logger.trace("ex: "+new Except("get json httpclient",e));
+                 logger.error("ex: "+new Except("get json httpclient",e));
                  return null;
               } 
               finally {
-                 try {
-                     if(httpclient!=null)httpclient.close();
-                 }
-                 catch(Exception e1){
-                    logger.trace("ex: "+new Except("httpclient.close",e1));
-                    return null;
-                 }
+            	  _close();
+                 //try {
+                 //    if(httpclient!=null)httpclient.close();
+                 //}
+                 //catch(Exception e1){
+                 //   logger.trace("ex: "+new Except("httpclient.close",e1));
+                 //   return null;
+                 //}
               }
 
               logger.trace("httpclient close");
@@ -158,7 +244,7 @@ public class lHttpCLN {
               
               String s_buf=new String(os.toByteArray(),Charset.forName("UTF-8")); 
 
-              logger.trace("httpclient get:"+s_buf);
+              //logger.trace("httpclient get:"+s_buf);
 
               //if(s_buf==null){
               //   logger.error("httpclient get is null");
@@ -174,7 +260,7 @@ public class lHttpCLN {
                  logger.error("ex:"+new Except("JSONTokener",e));
                  return null;
               } 
-              logger.trace("get json object");
+              //logger.trace("get json object");
               os.close();
               
 
@@ -184,37 +270,66 @@ public class lHttpCLN {
        }
        public void sent(ByteArrayOutputStream os,String filename) throws Exception{
               ByteArrayInputStream is=new ByteArrayInputStream(os.toByteArray());
+              //CloseableHttpClient httpclient =null;
+              //if(debug)System.out.println("ok!");
               
-              if(debug)System.out.println("ok!");
-              
-              HttpClient httpclient = HttpClientBuilder.create().build();
-              //httpclient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+              try {
+                   _open();
+                   /*
+                   if(username!=null && password!=null) {
+                      CredentialsProvider provider = new BasicCredentialsProvider();
+                      UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+                      //new AuthScope("www.verisign.com", 443, "realm")
+                      provider.setCredentials(AuthScope.ANY, credentials);
+                      httpclient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
+                   }else { 
+                      httpclient = HttpClientBuilder.create().build();
+                   }
+                   //CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+                   //httpclient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+                  
+                   HttpPost http_post = new HttpPost(url);
+                  */
+                   HttpPost http_post = new HttpPost(uri);
+                   
+                   MultipartEntityBuilder builder = MultipartEntityBuilder.create();        
 
-              HttpPost http_post = new HttpPost(url);
-              File file = new File("zaba_1.jpg");
+                   builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+                   builder.addBinaryBody(filename,is);              
 
-              MultipartEntityBuilder builder = MultipartEntityBuilder.create();        
-              builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-              builder.addBinaryBody(filename,is);              
-              FileBody fileBody = new FileBody(file);
-              builder.addPart("my_file", fileBody);
-              
-              HttpEntity entity = builder.build();
-              http_post.setEntity(entity);
-              
-              if(debug)System.out.println("executing request " + http_post.getRequestLine());
-
-              HttpResponse response = httpclient.execute(http_post);
-              HttpEntity response_entity = response.getEntity();
-
-              System.out.println(response.getStatusLine());
-              
-              if (response_entity != null) {
-                System.out.println(EntityUtils.toString(response_entity));
+                   //File file = new File(filename);           /**/
+                   //FileBody fileBody = new FileBody(file);       /**/
+                   //builder.addPart("file_"+filename, fileBody);         /**/
+                   
+                   HttpEntity entity = builder.build();
+                   http_post.setEntity(entity);
+                   
+                   //if(debug)System.out.println("executing request " + http_post.getRequestLine());
+                  
+                   HttpResponse response        = httpclient.execute(http_post);
+                   HttpEntity   response_entity = response.getEntity();
+                  
+                   //if(debug)System.out.println(response.getStatusLine());
+                   
+                   if (response_entity != null) {
+                      //if(debug)System.out.println(EntityUtils.toString(response_entity));
+                   }
+                   if (response_entity != null) {
+                       EntityUtils.consume(response_entity);
+                   }              
+              }catch(Exception e){
+                 logger.trace("ex: "+new Except("get json httpclient",e));
+                 return ;
+              } 
+              finally {
+                 try {
+                     if(httpclient!=null)httpclient.close();
+                 }
+                 catch(Exception e1){
+                    logger.trace("ex: "+new Except("httpclient.close",e1));
+                    return ;
+                 }
               }
-              if (response_entity != null) {
-                     EntityUtils.consume(response_entity);
-              }              
               
               //httpclient.getConnectionManager().shutdown();
               

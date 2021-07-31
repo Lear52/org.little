@@ -1,7 +1,6 @@
 package org.little.mq.file;
 
 public interface cmdElement {
-
        public void    clear();
        public void    open();
        public void    work();
