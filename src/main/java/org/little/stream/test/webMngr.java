@@ -1,4 +1,4 @@
-package org.little.stream.http2jms;
+package org.little.stream.test;
 
 import java.io.IOException;
 
@@ -19,8 +19,8 @@ import org.little.web.webRun;
  *  
  */
 public class webMngr extends webRun{
-	private static final long serialVersionUID = -8820420158454598488L;
-	private static final Logger logger = LoggerFactory.getLogger(webMngr.class);
+       private static final long serialVersionUID = -8820420158454598488L;
+       private static final Logger logger = LoggerFactory.getLogger(webMngr.class);
 
        @Override
        public void init() throws ServletException {

@@ -21,16 +21,18 @@ import org.little.web.webRun;
  *  
  */
 public class webMngr extends webRun{
-       /**
-	 * 
-	 */
-	private static final long serialVersionUID = -3163620482303427340L;
-	private static final Logger logger = LoggerFactory.getLogger(webMngr.class);
-       private commonKIR    cfg;
-       //private ImapView client;
+      private static final long serialVersionUID = -3163620482303427340L;
+      private static final Logger logger = LoggerFactory.getLogger(webMngr.class);
+        private commonKIR    cfg;
+        private listKIR      list;
+        private arhKIR       arh;
+        private loadKIR      load;
 
        public webMngr(){
               cfg = new commonKIR();
+              list=null;
+              arh =null;
+              load=null;
               logger.info("create webMngr");
        } 
 
@@ -42,17 +44,20 @@ public class webMngr extends webRun{
               logger.trace("start"+":"+getServletInfo());
               String xpath =this.getServletContext().getRealPath("");
               String _xpath=getParametr("config");
-              xpath+=_xpath;
+              _xpath=xpath+_xpath;
 
-              boolean ret=cfg.loadCFG(xpath);
+              boolean ret=cfg.loadCFG(_xpath);
               cfg.init();
               if(ret==false){
                  logger.error("error read config file:"+xpath);
                  return;
               }
+              arh=new arhKIR(xpath+cfg.getWorkPath());
+              list=new listKIR(xpath+cfg.getWorkPath());
+              load=new loadKIR(cfg,list);
+              load.open();
 
-
-              logger.info("START LITTLE.KIRWEB(VIEW) config:"+xpath+" "+Version.getVer()+"("+Version.getDate()+")");
+              logger.info("START LITTLE.KIR.WEB(VIEW) config:"+xpath+" "+Version.getVer()+"("+Version.getDate()+")");
               //-------------------------------------------------------------------------------------------------------
               super.init();
               //-------------------------------------------------------------------------------------------------------
@@ -64,12 +69,64 @@ public class webMngr extends webRun{
                cfg=null;
                super.destroy();
                //client=null;
-               logger.info("STOP LITTLE.KIRWEB(VIEW) "+Version.getVer()+"("+Version.getDate()+")");
+               logger.info("STOP LITTLE.KIR.WEB(VIEW) "+Version.getVer()+"("+Version.getDate()+")");
         }
 
        @Override
        public String getServletInfo() {
               return "Show KIR data";
+       }
+       private void doGetList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+               logger.trace("begin doGetList:");
+              
+              
+               logger.trace("end doGetList");
+       }
+       private void doGetStat(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+               logger.trace("begin doGetStat:");
+              
+              
+               logger.trace("end doGetStat");
+       }
+       private void doGetArh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+               logger.trace("begin doGetZip:");
+              
+               int       buf_size=-1;
+
+               String filename="kir_data.zip";
+
+               response.setContentType("application/octet-stream");
+               response.addHeader("Accept-Ranges","bytes");
+               response.setHeader("Content-Type","application/octet-stream");
+               response.setHeader("Content-Transfer-Encoding", "Binary");
+               response.setHeader("Content-Disposition", "inline; filename=\"" + filename + "\"");
+               response.setContentLength(buf_size);
+               logger.trace("set header");
+               arh.zipFlush(response.getOutputStream(),filename);
+
+               response.getOutputStream().flush();
+              
+               logger.trace("end doGetZip filename="+filename);
+       }
+       private void doGetZip(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+               logger.trace("begin doGetZip:");
+              
+               int       buf_size=-1;
+
+               String filename="kir_data.zip";
+
+               response.setContentType("application/octet-stream");
+               response.addHeader("Accept-Ranges","bytes");
+               response.setHeader("Content-Type","application/octet-stream");
+               response.setHeader("Content-Transfer-Encoding", "Binary");
+               response.setHeader("Content-Disposition", "inline; filename=\"" + filename + "\"");
+               response.setContentLength(buf_size);
+               logger.trace("set header");
+               list.zipFlush(response.getOutputStream());
+
+               response.getOutputStream().flush();;
+              
+               logger.trace("end doGetZip filename="+filename);
        }
 
        @Override
@@ -83,11 +140,23 @@ public class webMngr extends webRun{
               logger.trace("webAddr.doRun() path:"+path);
 
               if(path.startsWith("/stat")){
-                  return;
+                 doGetStat(request,response);
+                 return;
+              }
+              else
+              if(path.startsWith("/list")){
+                 doGetStat(request,response);
+                 return;
+              }
+              else
+              if(path.startsWith("/arh")){
+                 doGetArh(request,response);
+                 return;
               }
               else
               if(path.startsWith("/load")){
-                  return;
+                 doGetZip(request,response);
+                 return;
               }
   
               if(page==null)page = cfg.getDefPage();

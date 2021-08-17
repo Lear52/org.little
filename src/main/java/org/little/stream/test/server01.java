@@ -1,4 +1,4 @@
-package org.little.stream;
+package org.little.stream.test;
 
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;

@@ -4,11 +4,6 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 
 public class ufps_sl {
-       final private static String CLASS_NAME="prj0.stream.ufps_sl";
-       final private static int    CLASS_ID  =1604;
-             public  static String getClassName(){return CLASS_NAME;}
-             public  static int    getClassId(){return CLASS_ID;}
-             //private static Logger log=new Logger(CLASS_NAME);
 
        private ArrayList<String> to;
        private String from        ;

@@ -8,11 +8,11 @@ import org.little.util.run.iWrapper;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
 
-
 public class wrapperFile implements WrapperListener{
        private static final Logger logger = LoggerFactory.getLogger(wrapperFile.class);
 
-       private sendDir2MQ     serverFile;
+       private sendDir2MQ  serverFile;
+
        protected  wrapperFile(String args[]){
                   logger.trace("create FILE2MQ");
                   WrapperManager.start(this, args);

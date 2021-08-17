@@ -20,6 +20,20 @@ public class stringDate{
                return sfd.format(d);
            } catch (Exception e) { return null; }
     }
+    public static String date2filename(Date d){
+           if(d==null) return null;
+           try{
+               SimpleDateFormat sfd=new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+               return sfd.format(d);
+           } catch (Exception e) { return null; }
+    }
+    public static String date2Z(Date d){
+           if(d==null) return null;
+           try{
+               SimpleDateFormat sfd=new SimpleDateFormat("yyyy-MM-ddTHH:mm:ssZ");
+               return sfd.format(d);
+           } catch (Exception e) { return null; }
+    }
     public static String date2prn(Date d){
            if(d==null) return "";
            try{

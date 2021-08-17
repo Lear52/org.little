@@ -10,7 +10,8 @@ public class authUserEmpty implements authUser {
 
        private String        domain;
        public authUserEmpty(commonAUTH cfg_auth){
-              this.domain=cfg_auth.getDefaultDomain();
+               if(cfg_auth!=null)this.domain=cfg_auth.getDefaultDomain();
+               else this.domain="local";
               logger.info("create authUserEmpty");
        }
 

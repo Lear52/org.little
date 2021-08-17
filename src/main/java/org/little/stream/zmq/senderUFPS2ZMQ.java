@@ -1,4 +1,4 @@
-package org.little.stream;
+package org.little.stream.zmq;
        
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
@@ -13,7 +13,7 @@ import org.little.util.LoggerFactory;
 
 public class senderUFPS2ZMQ {
        private static final Logger logger = LoggerFactory.getLogger(senderUFPS2ZMQ.class);
-       private String     destinationName;
+       //private String     destinationName;
        private String     destinationURL;
        private ZContext   ctx;
        private ZMQ.Socket client;
@@ -26,18 +26,23 @@ public class senderUFPS2ZMQ {
               clear();
        }
 
-       public void clear() {
-              destinationName=null;
-              destinationURL =null;
+       public senderUFPS2ZMQ(String clientHost, int clientPort, int _timeout) {
+    	   clear();
+           timeout        =_timeout;
+           destinationURL ="tcp://"+clientHost+":"+clientPort;
+       }
+
+	protected void clear() {
+              //destinationName=null;
+              timeout        =25000;
+              destinationURL ="tcp://localhost:5555";
               ctx            =null;   
               client         =null;
               poller         =null;
        }
        
        public void open() {
-              timeout        =25000;
-              destinationURL ="tcp://localhost:5555";
-              destinationName="test_queue";
+              //destinationName="test_queue";
 
               ctx    = new ZContext();
               client = ctx.createSocket(SocketType.REQ);
@@ -61,11 +66,11 @@ public class senderUFPS2ZMQ {
               }
        }
        
-       public void run(String txt_msg) {
+       private void test_run(String txt_msg) {
               ZMsg msg = new ZMsg();
               msg.add(txt_msg);
               
-              ZMsg reply = send(destinationName, msg);
+              ZMsg reply = send(msg);
 
               if(reply != null) {
                  ZFrame status = reply.pop();
@@ -82,12 +87,12 @@ public class senderUFPS2ZMQ {
        }
 
        
-       private ZMsg send(String queue, ZMsg request){
+       private ZMsg send( ZMsg request){
 
                logger.trace("send cln 0");
 
-               request.push(new ZFrame(queue));
-               request.push(new ZFrame("MDPC01".getBytes(ZMQ.CHARSET)));
+               //request.push(new ZFrame(queue));
+               //request.push(new ZFrame("MDPC01".getBytes(ZMQ.CHARSET)));
 
                ZMsg reply = null;
 
@@ -99,30 +104,8 @@ public class senderUFPS2ZMQ {
                                if (poller.poll(timeout) == -1) break; // Interrupted
                                //logger.trace("send cln 3");
                                if(poller.pollin(0)) {
-                                   logger.trace("send cln 4 poling ok");
-                              
+                                   //logger.trace("send cln 4 poling ok");
                                    ZMsg msg = ZMsg.recvMsg(client);
-                                   // Don't try to handle errors, just assert noisily
-                                   /*
-                                   if(msg.size() < 3){
-                                      logger.error("msg.size() < 3");
-                                      break;
-                                   }
-                               
-                                   ZFrame header = msg.pop();
-                                   if("MDPC01".equals(header.toString())){
-                                      logger.error("no MDPC01");
-                                      break;
-                                   }
-                                   header.destroy();
-                               
-                                   ZFrame replyService = msg.pop();
-                                   if(queue.equals(replyService.toString())){
-                                      logger.error("no queue!="+queue);
-                                      break;
-                                   }
-                                   replyService.destroy();
-                                   */
                                    reply = msg;
                                    break;
                                }
@@ -148,7 +131,7 @@ public class senderUFPS2ZMQ {
               logger.trace("open cln");
               for(int i=0;i<100000;i++){
                    logger.trace("send i:"+i);
-                   sender.run("!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                   sender.test_run("!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                    logger.trace("send i:"+i+" ok");
                    //try{Thread.sleep(100);}catch(Exception e){}
               }

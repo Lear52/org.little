@@ -11,7 +11,6 @@ public class reportMsg {
        final private static int    CLASS_ID  =2404;
              public  static String getClassName(){return CLASS_NAME;}
              public  static int    getClassId(){return CLASS_ID;}
-             //private static Logger log=new Logger(CLASS_NAME);
 
        private String     id;        
        private String     source;    

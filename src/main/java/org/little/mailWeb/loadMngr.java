@@ -44,15 +44,6 @@ public class loadMngr extends webThread{
               }
               logger.info("START LITTLE.IMAPWEB(LOAD) config:"+xpath+" "+Version.getVer()+"("+Version.getDate()+")");
               client.start(runner);
-              /*
-              ArrayList<ImapLoadBox> list=client.get();
-              for(int i=0;i<list.size();i++) {
-            	  ImapLoadBox cln = list.get(i);
-            	  int st=(cln.getTimeout()*i)/(list.size());
-            	  cln.setStart(st);
-            	  runner.add(cln);
-              }
-              */
               //-------------------------------------------------------------------------------------------------------
               super.init();
               //-------------------------------------------------------------------------------------------------------

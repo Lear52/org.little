@@ -6,6 +6,7 @@
 package org.little.util.run;
 
 import org.little.util.Logger;
+import org.little.util.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,11 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 
  */
 public class tfork implements Runnable{
-       final private static String CLASS_NAME="org.little.util.fork";
-       final private static int    CLASS_ID  =118;
-             public  static String getClassName(){return CLASS_NAME;}
-             public  static int    getClassId(){return CLASS_ID;}
-             private static Logger log=new Logger(CLASS_NAME);
+       private static final Logger logger = LoggerFactory.getLogger(tfork.class);
 
 
        // Системный потокдля запуска задач в паралель
@@ -47,7 +44,7 @@ public class tfork implements Runnable{
 
               for(int i=0;i<10;i++){
                   delay(1);
-                  log.trace("empty RUN!!!! Override !!!!");
+                  logger.trace("empty RUN!!!! Override !!!!");
               }
               stop();
 

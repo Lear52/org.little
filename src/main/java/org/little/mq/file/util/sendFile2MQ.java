@@ -18,7 +18,6 @@ public class sendFile2MQ{
        //private boolean     is_read_file;
        //private boolean     is_send_msg;
        //private int         size_msg;
-
        public sendFile2MQ() {
               clear();
        }

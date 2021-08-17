@@ -14,8 +14,9 @@ public class authUserStub implements authUser {
         private String        domain;
         
         public authUserStub(commonAUTH cfg_auth){
-              this.domain=cfg_auth.getDefaultDomain();
-              logger.info("create authUserStub");
+               if(cfg_auth!=null)this.domain=cfg_auth.getDefaultDomain();
+               else this.domain="local";
+               logger.info("create authUserStub");
         }
 
         public String  getFullUserName(String username){

@@ -3,7 +3,7 @@ package org.little.stream.ufps;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 
-public class ufps_sl {
+public class ufpsSL {
 
        private ArrayList<String> to;
        private String from        ;
@@ -19,9 +19,8 @@ public class ufps_sl {
        private String ack_request ;
      
 
-       public ufps_sl() {
-    	      clear();
-    	    
+       public ufpsSL() {
+              clear();
        }
        public void clear() {
               to          =new ArrayList<String>(4);  

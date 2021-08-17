@@ -39,9 +39,6 @@ public class sendDir2MQ extends tfork implements cmdElement  {
        private ArrayList<pathElement> list_file;
        private String                 arh_dirname;
 
-
-
-
        private static Hashtable<String,ArrayList<pathElement>> h_list = new Hashtable<String,ArrayList<pathElement>>();
 
        public sendDir2MQ() {

@@ -49,14 +49,6 @@ public class webMngr extends webRun{
                  return;
               }
 
-              //client=new ImapView();
-              //if(client.loadCFG(xpath)==false){
-              //   client=null;
-             //    logger.error("error read config file:"+xpath);
-             //    return;
-             // }
-             // client.setDelay(client.getTimeout());
-
               logger.info("START LITTLE.IMAPWEB(VIEW) config:"+xpath+" "+Version.getVer()+"("+Version.getDate()+")");
               //-------------------------------------------------------------------------------------------------------
               super.init();

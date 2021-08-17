@@ -1,4 +1,6 @@
-package org.little.stream;
+package org.little.stream.zmq;
+
+import java.nio.charset.Charset;
 
 import org.little.util.Except;
 import org.little.util.Logger;
@@ -7,10 +9,12 @@ import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
+import org.zeromq.ZFrame;
+
 
 public class receiveUFPS2ZMQ {
        private static final Logger logger = LoggerFactory.getLogger(receiveUFPS2ZMQ.class);
-       private String       destinationName;
+       //private String       destinationName;
        private String       destinationURL;
        private ZContext     ctx;
        private ZMQ.Socket   server;
@@ -21,17 +25,24 @@ public class receiveUFPS2ZMQ {
               clear();
        }
 
-       public void clear() {
+       public receiveUFPS2ZMQ(String localBindServer, int port, int _timeout) {
+              clear();
+         	  timeout        =_timeout;
+    	      destinationURL ="tcp://"+localBindServer+":"+port;
+       }
+
+	protected void clear() {
               timeout        =25000;
-              destinationName=null; 
+              destinationURL ="tcp://*:5555";
+              //destinationName=null; 
               ctx            =null;             
               server         =null;
               poller         =null;
        }
        
        public void open() {
-               destinationURL ="tcp://*:5555";
-               destinationName="test_queue";
+               //destinationURL ="tcp://*:5555";
+               //destinationName="test_queue";
                ctx = new ZContext(1);
                try {
                   server = ctx.createSocket(SocketType.REP);
@@ -82,7 +93,27 @@ public class receiveUFPS2ZMQ {
                return null;
         }
        
-       public void run() {
+       @SuppressWarnings("unused")
+	   private String test_run(){
+               Charset charset=ZMQ.CHARSET;
+              
+               logger.trace("receive() srv");
+               ZMsg msg = receive();
+               ZFrame _mark  = msg.pop();
+               _mark.destroy();;
+               ZFrame _queue = msg.pop();
+               _queue.destroy();
+               String queue;
+               queue=_queue.getString(charset);
+               
+               ZFrame _data  = msg.pop();
+               String data;
+               data=_data.getString(charset);
+               msg.destroy();
+               return data;
+        }
+       
+        private void _run() {
               long end=System.currentTimeMillis()+1000;
               long count=0;
               while (!Thread.currentThread().isInterrupted()) {
@@ -93,7 +124,7 @@ public class receiveUFPS2ZMQ {
                     msg.destroy();
                     if(System.currentTimeMillis()>end){
                        end=System.currentTimeMillis()+1000;                  
-                       System.out.println("Received:" + count);
+                       //System.out.println("Received:" + count);
                        count=0;
                     }
 
@@ -105,7 +136,7 @@ public class receiveUFPS2ZMQ {
               logger.trace("start srv");
               srv.open();
               logger.trace("open srv");
-              srv.run();
+              srv._run();
               logger.trace("stop run");
               srv.close();
               logger.trace("stop srv");

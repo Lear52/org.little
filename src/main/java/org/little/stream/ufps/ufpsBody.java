@@ -1,14 +1,13 @@
 package org.little.stream.ufps;
 
-
-public class ufps_body {
+public class ufpsBody {
 
        private String body;
      
 
-       public ufps_body() {
-    	      clear();
-    	    
+       public ufpsBody() {
+              clear();
+               
        }
        public void clear() {
               body        ="";
@@ -19,9 +18,9 @@ public class ufps_body {
 
 
        public String toString(){
-                               return 
-                               " body:"+get()        
-                               ;
+                     return 
+                           " body:"+get()        
+                     ;
        }
 
        public static void main(String[] args) throws Exception {

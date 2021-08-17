@@ -1,5 +1,6 @@
-package org.little.stream;
+package org.little.stream.test;
              
+import org.little.stream.cfg.commonStream;
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
 //import org.w3c.dom.Node;

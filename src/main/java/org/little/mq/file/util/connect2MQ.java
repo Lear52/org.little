@@ -112,8 +112,6 @@ public class connect2MQ{
 // #define MQRO_COD_WITH_DATA             0x00001800
 // #define MQRO_COD_WITH_FULL_DATA        0x00003800
 
-
-
        // JmsChannel:SYSTEM.ADMIN.SVRCONN/Port:1414/Host:10.70.112.86/Queue:UTP@QM_cc/User:av/Passwd:av123/Report:1792!UTP@QM_cc/Persistence:true
        public int init(String _connect_qm_name,String _jms) {
               StringTokenizer          parser_str;

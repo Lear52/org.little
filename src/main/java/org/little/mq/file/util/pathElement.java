@@ -24,7 +24,7 @@ import org.little.util.LoggerFactory;
 
 public class pathElement{
        private static final Logger log = LoggerFactory.getLogger(pathElement.class);
-       public  static String getClassName(){return pathElement.class.getName();}
+       //public  static String getClassName(){return pathElement.class.getName();}
 
        private Path in_file;
        private long start;
@@ -278,7 +278,7 @@ public class pathElement{
        }
 
        public static void help(String[] args) {
-              System.out.println("run java "+getClassName()+" global_dirname range_msek [local_dir_name]");
+              System.out.println("run java "+pathElement.class+" global_dirname range_msek [local_dir_name]");
        }
        public static void main(String[] args) {
 

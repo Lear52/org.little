@@ -7,11 +7,6 @@ import org.little.util.db.dbExcept;
 import org.little.util.db.query;
 
 public class headerMsg {
-       final private static String CLASS_NAME="prj0.potok.headerMsg";
-       final private static int    CLASS_ID  =2404;
-             public  static String getClassName(){return CLASS_NAME;}
-             public  static int    getClassId(){return CLASS_ID;}
-             //private static Logger log=new Logger(CLASS_NAME);
 
 
        private String     id;        

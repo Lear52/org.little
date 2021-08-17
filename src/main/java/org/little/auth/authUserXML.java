@@ -40,6 +40,9 @@ public class authUserXML implements authUser {
        }
        */
        private synchronized void load() {
+               if(cfg_filename==null)return;
+               if(cfg_filename.equals(""))return;
+               if(cfg_filename.startsWith(" "))return;
                if(doc==null){
                   DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                   try {

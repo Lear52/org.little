@@ -1,6 +1,8 @@
 package org.little.db.kir;
                     
 import java.sql.Timestamp;
+import java.util.Date;
+
 //import java.util.ArrayList;
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
@@ -62,17 +64,35 @@ public class objKIR{
        }
        
        public StringBuilder printXML(StringBuilder buf) {
+              buf.append("<KIR>");
               buf.append("<DT>")    .append(getTime  ()).append("</DT>");
               buf.append("<MSG_ID>").append(getMsgID ()).append("</MSG_ID>");
               buf.append("<DOC_ID>").append(getDocID ()).append("</DOC_ID>");
               buf.append("<COR_ID>").append(getCorID ()).append("</COR_ID>");
               buf.append("<TO>")    .append(getTo    ()).append("</TO>");
               buf.append("<FROM>")  .append(getFrom  ()).append("</FROM>");
+              buf.append("</KIR>\n");
               return buf;
        }
        public String printXML() {
               StringBuilder buf=new StringBuilder();
               return printXML(buf).toString();
+       }
+       public static void main(String args[]){
+              listKIR list=new listKIR("./var/kir");
+              objKIR  obj=new objKIR();
+              list.open();
+              for(int i=0;i<1000000;i++){
+                  obj.setTime  (new Timestamp(new Date().getTime()));
+                  obj.setMsgID ("msg_id"+i);
+                  obj.setDocID ("doc_id"+i);
+                  obj.setCorID ("cor_id"+i);
+                  obj.setTo    ("to:"+i);
+                  obj.setFrom  ("from:"+i);
+                  list.write(obj);
+              }
+              list.close();
+
        }
 
 }

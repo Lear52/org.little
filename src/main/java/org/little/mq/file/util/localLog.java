@@ -10,7 +10,7 @@ import org.little.util.LoggerFactory;
 
 public class localLog{
        private static final Logger log = LoggerFactory.getLogger(localLog.class);
-       public  String getClassName(){return localLog.class.getName();}
+       //public  String getClassName(){return localLog.class.getName();}
 
        private FileWriter file;
        private String     filename;
