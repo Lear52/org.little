@@ -1,9 +1,6 @@
 package org.little.stream.test;
                
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-//import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -23,9 +20,10 @@ public class SAX {
        private static final Logger log = LoggerFactory.getLogger(SAX.class);
 
 
-       private static String parse() throws Except{
-               return parse(def_msg2.getBytes());
-       }
+       //private static String parse() throws Except{
+       //        return parse(def_msg2.getBytes());
+       //}
+       @SuppressWarnings("unused")
        private static String parse(byte[] buf) throws Except{
                ByteArrayInputStream in          = new ByteArrayInputStream(buf);
                Writer               out         = new StringWriter();

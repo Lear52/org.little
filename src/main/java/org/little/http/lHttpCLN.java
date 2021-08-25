@@ -114,7 +114,8 @@ public class lHttpCLN {
                    CloseableHttpResponse response = null;
                    InputStream is=null;
                    try {
-                        response = httpclient.execute(http_get);
+                        if(context!=null) response = httpclient.execute(http_get,context);
+                        else              response = httpclient.execute(http_get);
                         HttpEntity ent = response.getEntity();
                         if(ent==null) {
                             return null;       
@@ -306,7 +307,9 @@ public class lHttpCLN {
                    
                    //if(debug)System.out.println("executing request " + http_post.getRequestLine());
                   
-                   HttpResponse response        = httpclient.execute(http_post);
+                   HttpResponse response        = null;
+                   if(context!=null) response = httpclient.execute(http_post,context);
+                   else              response = httpclient.execute(http_post);
                    HttpEntity   response_entity = response.getEntity();
                   
                    //if(debug)System.out.println(response.getStatusLine());

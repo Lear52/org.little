@@ -14,7 +14,6 @@ import org.zeromq.ZFrame;
 
 public class receiveUFPS2ZMQ {
        private static final Logger logger = LoggerFactory.getLogger(receiveUFPS2ZMQ.class);
-       //private String       destinationName;
        private String       destinationURL;
        private ZContext     ctx;
        private ZMQ.Socket   server;
@@ -27,22 +26,19 @@ public class receiveUFPS2ZMQ {
 
        public receiveUFPS2ZMQ(String localBindServer, int port, int _timeout) {
               clear();
-         	  timeout        =_timeout;
-    	      destinationURL ="tcp://"+localBindServer+":"+port;
+                  timeout        =_timeout;
+                 destinationURL ="tcp://"+localBindServer+":"+port;
        }
 
-	protected void clear() {
+          private void clear() {
               timeout        =25000;
               destinationURL ="tcp://*:5555";
-              //destinationName=null; 
               ctx            =null;             
               server         =null;
               poller         =null;
        }
        
        public void open() {
-               //destinationURL ="tcp://*:5555";
-               //destinationName="test_queue";
                ctx = new ZContext(1);
                try {
                   server = ctx.createSocket(SocketType.REP);
@@ -94,7 +90,7 @@ public class receiveUFPS2ZMQ {
         }
        
        @SuppressWarnings("unused")
-	   private String test_run(){
+          private String test_run(){
                Charset charset=ZMQ.CHARSET;
               
                logger.trace("receive() srv");
@@ -113,7 +109,8 @@ public class receiveUFPS2ZMQ {
                return data;
         }
        
-        private void _run() {
+        @SuppressWarnings("unused")
+              private void _run() {
               long end=System.currentTimeMillis()+1000;
               long count=0;
               while (!Thread.currentThread().isInterrupted()) {

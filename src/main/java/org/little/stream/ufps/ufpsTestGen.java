@@ -1,7 +1,7 @@
 package org.little.stream.ufps;
 
 import java.util.Date;
-import org.little.util.Except;
+//import org.little.util.Except;
 import org.little.util.string.stringDate;
 
 public class ufpsTestGen {

@@ -49,7 +49,7 @@ public class authUserXML implements authUser {
                        DocumentBuilder builder;
                        builder  = factory.newDocumentBuilder();
                        doc      = builder.parse(cfg_filename);
-                       logger.trace("open doc:"+cfg_filename);
+                       logger.trace("open authUserXML file:"+cfg_filename);
                        Node node_cfg = doc.getFirstChild();                
                        init(node_cfg);
                        doc=null;

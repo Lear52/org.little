@@ -21,113 +21,115 @@ public class ufpsSAXParser {
        private static XMLInputFactory  ifactory  = XMLInputFactory.newInstance();
        private static XMLOutputFactory ofactory  = XMLOutputFactory.newInstance();
 
-       private ByteArrayInputStream  in               ;
        private Writer                out              ;
        private XMLStreamWriter       xml_writer       ;
        private XMLStreamReader       xml_reader       ;
        private ufpsMsg               msg              ;            
        private boolean               is_parse         ;
        private boolean               is_del           ;
-       private String                current_element  ;
-       private String                current_namespace;
-       private String                current_uri      ;
+       //private String                current_element  ;
+       //private String                current_namespace;
+       //private String                current_uri      ;
 
        private String                after_element    ;
        private String                add_element      ;
        private String                add_element_data ;
        
-
-       protected void init(ufpsMsg msg,byte[] buf,int element_add,String _after_element,String element,String element_data){
-              in  = new ByteArrayInputStream(buf);
-              out = null;
-              this.msg         = msg;
-              msg.setBuf(buf);
-              is_del           = false;
-              is_parse         = true;
-              xml_reader       = null;
-              xml_writer       = null;
-              current_element  = null;
-              current_namespace= null;
-              current_uri      = null;      
-              try {
-                   xml_reader = ifactory.createXMLStreamReader(in);
-              } 
-              catch (XMLStreamException e) {
-                     in          = null;
-                     xml_reader  = null;
-                     logger.error(""+new Except("Error createXMLStreamReader",e));
-                     return;
-              }
-
-              if(element_add!=0)add_element      =element;      // add or del
-              else              add_element      =null;
-              if(element_add>0 )add_element_data =element_data;// add
-              else              add_element_data =null;        // del
-              after_element     =_after_element;
-
-              if(element_add!=0) {
-                 out  = new StringWriter();
-                 try {
-                     xml_writer = ofactory.createXMLStreamWriter(out);
-                 } 
-                 catch (XMLStreamException e) {
-                        in          = null;
-                        xml_reader  = null;
-                        xml_writer  = null;
-                        out         = null;
-                        logger.error(""+new Except("Error createXMLStreamWriter",e));
-                        return;
-                 }
-              } 
-
-       }
        public ufpsSAXParser(ufpsMsg msg,byte[] buf,String after_element,String element,String element_data){ // add element after  element
-           init(msg,buf,1,after_element,element,element_data);
+              init(msg,buf,1,after_element,element,element_data);
        }
        public ufpsSAXParser(ufpsMsg msg,byte[] buf,String element){ //del element
-           init(msg,buf,-1,null,element,null);
+              init(msg,buf,-1,null,element,null);
        }
        public ufpsSAXParser(ufpsMsg msg,byte[] buf){ //no change
-           init(msg,buf,0,null,null,null);
+              init(msg,buf,0,null,null,null);
        }
 
-       private void setElement(ufpsMsg msg,String element,String data, XMLStreamWriter xml_writer){
+       private void init(ufpsMsg msg,byte[] buf,int element_add,String _after_element,String element,String element_data){
+                  ByteArrayInputStream in  = new ByteArrayInputStream(buf);
+               out = null;
+               this.msg         = msg;
+               msg.setBuf(buf);
+               is_del           = false;
+               is_parse         = true;
+               xml_reader       = null;
+               xml_writer       = null;
+               //current_element  = null;
+               //current_namespace= null;
+               //current_uri      = null;      
+               try {
+                    xml_reader = ifactory.createXMLStreamReader(in);
+               } 
+               catch (XMLStreamException e) {
+                      in          = null;
+                      xml_reader  = null;
+                      logger.error(""+new Except("Error createXMLStreamReader",e));
+                      return;
+               }
+              
+               if(element_add!=0)add_element      =element;      // add or del
+               else              add_element      =null;
+               if(element_add>0 )add_element_data =element_data;// add
+               else              add_element_data =null;        // del
+               after_element     =_after_element;
+              
+               if(element_add!=0) {
+                  out  = new StringWriter();
+                  try {
+                      xml_writer = ofactory.createXMLStreamWriter(out);
+                  } 
+                  catch (XMLStreamException e) {
+                         in          = null;
+                         xml_reader  = null;
+                         xml_writer  = null;
+                         out         = null;
+                         logger.error(""+new Except("Error createXMLStreamWriter",e));
+                         return;
+                  }
+               } 
+
+       }
+
+       private void setElement(String element,String data){//ufpsMsg msg,,, XMLStreamWriter xml_writer
                if(is_parse==false)return;
                if(element==null)return;
                if(data==null)return;
-               //logger.trace("elenment:"+element+" data:"+data);
-               //if(element.equalsIgnoreCase(ufpsDef.H_HEADER                  )){}else
-               if(element.equalsIgnoreCase(ufpsDef.H_BODY                      )){is_parse=false;         }else
-               if(element.equalsIgnoreCase(ufpsDef.H_NAME_TO                   )){msg.addTO(data)        ;}else
-               if(element.equalsIgnoreCase(ufpsDef.H_NAME_FROM                 )){msg.setFROM(data)      ;}else
-               //if(element.equalsIgnoreCase(def.H_MESSAGE_INFO_TAG          )){}else
-               if(element.equalsIgnoreCase(ufpsDef.H_MESSAGE_TYPE              )){msg.setType(data)      ;}else
-               if(element.equalsIgnoreCase(ufpsDef.H_PRIORITY                  )){msg.setPriority(data)  ;}else
-               if(element.equalsIgnoreCase(ufpsDef.H_MESSAGE_ID                )){msg.setID(data)        ;}else
-               //if(element.equalsIgnoreCase(ufpsDef.H_LEGACY_TRANSPORT_FILE_NAME)){}else
-               if(element.equalsIgnoreCase(ufpsDef.H_APPLICATION_MESSAGE_ID    )){msg.setAppID(data)     ;}else
-               if(element.equalsIgnoreCase(ufpsDef.H_CORRELATION_MESSAGE_ID    )){msg.setCorID(data)     ;}else
-              
-               if(element.equalsIgnoreCase(ufpsDef.H_CREATE_TIME               )){msg.setCreateTime(data);}else
-               if(element.equalsIgnoreCase(ufpsDef.H_SEND_TIME                 )){msg.setSendTime(data)  ;}else
-               if(element.equalsIgnoreCase(ufpsDef.H_RECEIVE_TIME              )){msg.setReceveTime(data);}else
-               if(element.equalsIgnoreCase(ufpsDef.H_ACCEPT_TIME               )){msg.setAcceptTime(data);}else
-              
-               if(element.equalsIgnoreCase(ufpsDef.H_ACKNOLEDGE_REQUEST        )){msg.setAckRequest(data);}else
 
-               if(element.equalsIgnoreCase(ufpsDef.H_DOC_FORMAT                )){msg.setDocFormat (data);}else
-               if(element.equalsIgnoreCase(ufpsDef.H_DOC_TYPE                  )){msg.setDocType   (data);}else
-               if(element.equalsIgnoreCase(ufpsDef.H_DOC_ID                    )){msg.setDocID     (data);}else
-               if(element.equalsIgnoreCase(ufpsDef.H_DOC_REFID                 )){}else
-               if(element.equalsIgnoreCase(ufpsDef.H_DOC_EDNO                  )){}else
-               if(element.equalsIgnoreCase(ufpsDef.H_DOC_EDDATE                )){}else
-               if(element.equalsIgnoreCase(ufpsDef.H_DOC_EDAUTHOR              )){}else
+               //logger.trace("elenment:"+element+" data:"+data);
+
+               //if(element.equalsIgnoreCase(ufpsDef.H_HEADER                  )){}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_BODY                      )){is_parse=false;         return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_NAME_TO                   )){msg.addTO(data)        ;return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_NAME_FROM                 )){msg.setFROM(data)      ;return;}else
+               //if(element.equalsIgnoreCase(def.H_MESSAGE_INFO_TAG          )){}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_MESSAGE_TYPE              )){msg.setType(data)      ;return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_PRIORITY                  )){msg.setPriority(data)  ;return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_MESSAGE_ID                )){msg.setID(data)        ;return;}else
+               //if(element.equalsIgnoreCase(ufpsDef.H_LEGACY_TRANSPORT_FILE_NAME)){}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_APPLICATION_MESSAGE_ID    )){msg.setAppID(data)     ;return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_CORRELATION_MESSAGE_ID    )){msg.setCorID(data)     ;return;}else
+              
+               if(element.equalsIgnoreCase(ufpsMsgField.H_CREATE_TIME               )){msg.setCreateTime(data);return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_SEND_TIME                 )){msg.setSendTime(data)  ;return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_RECEIVE_TIME              )){msg.setReceveTime(data);return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_ACCEPT_TIME               )){msg.setAcceptTime(data);return;}else
+              
+               if(element.equalsIgnoreCase(ufpsMsgField.H_ACKNOLEDGE_REQUEST        )){msg.setAckRequest(data);return;}else
+
+               if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_FORMAT                )){msg.setDocFormat (data);return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_TYPE                  )){msg.setDocType   (data);return;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_ID                    )){msg.setDocID     (data);return;}else
+               //if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_REFID                 )){}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_EDNO                  )){msg.setDocEDNO       (data);}else  
+               if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_EDDATE                )){msg.setDocEDDate     (data);}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_EDAUTHOR              )){msg.setDocEDAutor    (data);}else
                {}
+               //logger.trace("msg:"+msg.toString());
          
        }
        private void endElement(String element){
                if(element==null)return;
-               if(element.equalsIgnoreCase(ufpsDef.H_HEADER                    )){is_parse=false;}else
+               if(element.equalsIgnoreCase(ufpsMsgField.H_HEADER                    )){is_parse=false;}else
                /*
                if(element.equalsIgnoreCase(ufpsDef.H_NAME_TO                   )){}else
                if(element.equalsIgnoreCase(ufpsDef.H_NAME_FROM                 )){}else
@@ -154,7 +156,7 @@ public class ufpsSAXParser {
                {}
          
        }
-       private void addElement(String _current_element) {
+       private void addElement(String _current_element,String current_namespace,String current_uri) {
                if(xml_writer==null)return;
                if(_current_element==null)return;
                if(after_element==null)return;
@@ -177,6 +179,9 @@ public class ufpsSAXParser {
        }
 
        public ufpsMsg parse() {
+              String current_element=null;
+              String current_namespace=null;
+              String current_uri=null;
               if(xml_reader  ==null)return null;
               try {
                   int     event            = xml_reader.getEventType();
@@ -186,26 +191,30 @@ public class ufpsSAXParser {
                          QName obj=null;
                          switch (event) {
                          case XMLStreamConstants.START_DOCUMENT:
-                              String encoding = xml_reader.getCharacterEncodingScheme();
-                              if(encoding==null)encoding="UTF-8";
-                              String ver=xml_reader.getVersion();
-                              if(ver==null)ver="1.0";
-                              if(xml_writer!=null && !is_del)xml_writer.writeStartDocument(encoding,ver);                                 
+                              if(xml_writer!=null && !is_del){
+                                 String encoding = xml_reader.getCharacterEncodingScheme();
+                                 if(encoding==null)encoding="UTF-8";
+                                 String ver=xml_reader.getVersion();
+                                 if(ver==null)ver="1.0";
+                                 xml_writer.writeStartDocument(encoding,ver);
+                              }
                               break;
                          case XMLStreamConstants.START_ELEMENT:
                               {//---------------------------------------------------------------------------------------------------------
-                              obj=xml_reader.getName();
-                              current_namespace=obj.getPrefix();
-                              current_element  =obj.getLocalPart();
-                              current_uri = obj.getNamespaceURI();
-                              is_del=delElement(current_element);
+                              obj              = xml_reader.getName();
+                              current_namespace= obj.getPrefix();
+                              current_element  = obj.getLocalPart();
+                              current_uri      = obj.getNamespaceURI();
+                              is_del           = delElement(current_element);
+
+                              //---------------------------------------------------------------------------------------------------------
                               if(xml_writer!=null && !is_del)xml_writer.writeStartElement(current_namespace, current_element, current_uri);
                               //---------------------------------------------------------------------------------------------------------
-                              {
+                              if(xml_writer!=null && !is_del){
                                 for (int i = 1; i < xml_reader.getNamespaceCount(); i++) {
                                   String uri = xml_reader.getAttributeNamespace(i);
                                   if(uri==null)   uri=obj.getNamespaceURI();
-                                  if(xml_writer!=null && !is_del)xml_writer.writeNamespace(current_namespace,  uri);
+                                  xml_writer.writeNamespace(current_namespace,  uri);
                                 }
                               }   
                               //---------------------------------------------------------------------------------------------------------
@@ -220,23 +229,34 @@ public class ufpsSAXParser {
                                   else  qName = prefix + ':' + localName;
                                   String value = xml_reader.getAttributeValue(i);
                                   if(xml_writer!=null && !is_del)xml_writer.writeAttribute(qName, value);
+
+                                  setElement(localName,value);
+
                                 }
                               }
+                              
                               //---------------------------------------------------------------------------------------------------------
                               }
                               break;
                          case XMLStreamConstants.CHARACTERS:
-                              if(!is_del)setElement(msg,current_element,xml_reader.getText(),xml_writer);
-                              if(xml_writer!=null && !is_del)xml_writer.writeCharacters(xml_reader.getText());
+                              if(!is_del){
+                                 setElement(current_element,xml_reader.getText());//msg,,xml_writer
+                                 current_element=null;
+                              }
+                              if(xml_writer!=null && !is_del){
+                                 xml_writer.writeCharacters(xml_reader.getText());
+                              }
                               break;
                          case XMLStreamConstants.END_ELEMENT:
-                              obj=xml_reader.getName();
+                             {
+                              obj      =xml_reader.getName();
                               String el=obj.getLocalPart();
                               endElement(el);
                               if(xml_writer!=null && !is_del)xml_writer.writeEndElement();
                               if(delElement(el)==true)is_del=false;
-                              addElement(el);
-
+                              addElement(el,current_namespace,current_uri);
+                             }
+                             current_element=null;
                               break;
                          case XMLStreamConstants.END_DOCUMENT:
                               if(xml_writer!=null)xml_writer.writeEndDocument();
@@ -249,6 +269,7 @@ public class ufpsSAXParser {
                          if (xml_reader.hasNext())event = xml_reader.next();
                          else is_run=false;
                   }
+                  logger.trace("msg:"+msg.toString());
                   if(xml_writer!=null) {
                      String s_out=out.toString();
                      if(s_out!=null){
@@ -268,7 +289,6 @@ public class ufpsSAXParser {
                    try{xml_writer.close();} catch (XMLStreamException e) {}
                    xml_writer  = null;
                    out         = null;
-                   in          = null;
                    xml_reader  = null;
               }
               return msg;
@@ -279,10 +299,15 @@ public class ufpsSAXParser {
               int  size=1;
               byte [] buf=def_msg2.getBytes();
               ufpsMsg msg=new ufpsMsg(); 
+              //System.out.println("-------------------\n");
+              //System.out.println(new String(buf));
+              //System.out.println("-------------------\n");
+
               for(int i=0;i<size;i++){
                   ufpsSAXParser sax=new ufpsSAXParser(msg,buf);
-                 String s=sax.parse().toString();    
-                 System.out.println("-------------------\n"+s);
+                  ufpsMsg msg2=sax.parse();    
+                  String s=msg2.toString();    
+                  System.out.println("-------------------\n"+s);
               }
               start=System.currentTimeMillis()-start;
               System.out.println("\ntime:"+start+"\n s:"+(double)size/(double)start*1000);

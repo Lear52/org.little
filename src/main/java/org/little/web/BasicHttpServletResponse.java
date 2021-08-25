@@ -1,0 +1,33 @@
+package org.little.web;
+
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+
+public class BasicHttpServletResponse extends HttpServletResponseWrapper {
+
+       private transient boolean statusSet = false;
+      
+       public BasicHttpServletResponse(final HttpServletResponse response) {
+           super(response);
+       }
+      
+       public boolean isStatusSet() {
+           return this.statusSet;
+       }
+      
+       @Override
+       public void setStatus(final int status) {
+           super.setStatus(status);
+           this.statusSet = true;
+       }
+      
+       public void setStatus(final int status, final boolean immediate) throws IOException {
+           setStatus(status);
+           if (immediate) {
+               setContentLength(0);
+               flushBuffer();
+           }
+       }
+}     

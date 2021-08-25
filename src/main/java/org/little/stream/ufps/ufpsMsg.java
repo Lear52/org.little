@@ -2,8 +2,6 @@ package org.little.stream.ufps;
 
 import java.util.ArrayList;
 
-import org.little.stream.test.ufpsReader;
-import org.little.util.Except;
 import org.little.stream.mngr.ufpsTime;
 
 public class ufpsMsg {
@@ -19,14 +17,18 @@ public class ufpsMsg {
        }
        public ufpsMsg(byte [] data,long time_receive) {
               clear();
+
               if(time_receive==0)time_receive=System.currentTimeMillis();
               String _time_receive=ufpsTime.getText(time_receive);
-              ufpsSAXParser sax=new ufpsSAXParser(this,data,ufpsDef.H_SEND_TIME,ufpsDef.H_RECEIVE_TIME,_time_receive);
+
+              ufpsSAXParser sax=new ufpsSAXParser(this,data,ufpsMsgField.H_SEND_TIME,ufpsMsgField.H_RECEIVE_TIME,_time_receive);
               if(sax.parse().toString()==null)clear();    
        }
        public ufpsMsg(byte [] data) {
               clear();
+
               ufpsSAXParser sax=new ufpsSAXParser(this,data);
+
               if(sax.parse().toString()==null)clear();    
        }
        public void clear() {
@@ -53,8 +55,13 @@ public class ufpsMsg {
        public void    setDocID     (String arg){doc.setID       (arg);}        
        public void    setDocType   (String arg){doc.setType     (arg);}        
        public void    setDocFormat (String arg){doc.setFormat   (arg);}        
+       public void    setDocEDNO   (String arg){doc.setEDNO     (arg);}     
+       public void    setDocEDDate (String arg){doc.setEDDate   (arg);}     
+       public void    setDocEDAutor(String arg){doc.setEDAutor  (arg);}     
+
        public String               getTO_0(){return sl.getTO().get(0);}
        public ArrayList<String>    getTO  (){return sl.getTO();}
+
        public String  getFROM             (){return sl.getFROM      ();}     
        public String  getType             (){return sl.getType      ();}      
        public String  getPriority         (){return sl.getPriority  ();}  

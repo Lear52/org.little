@@ -1,12 +1,13 @@
 package org.little.stream.mngr;
-
+        
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
         
 public class ufpsTime {
 
-       private static     SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-ddTHH:mm:ssZ");
+       //private static     SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-ddTHH:mm:ssZ");
+       private static     SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
        private  long      time;
        private  String    text;  
        private  Timestamp timestamp;
@@ -29,7 +30,7 @@ public class ufpsTime {
        }
        public long getTime() {return time;}
        public String getText() {
-                 if(time==0)return "-";
+              if(time==0)return "-";
               if(text==null){
                  try{
                      text=format.format(new Date(time));
@@ -39,7 +40,7 @@ public class ufpsTime {
        }
        public Timestamp getTimestamp() {
               if(timestamp==null){
-                    timestamp=new Timestamp(time);
+                 timestamp=new Timestamp(time);
               }
               return timestamp;
        }
@@ -56,7 +57,8 @@ public class ufpsTime {
               if("-".contentEquals(_text))return;
               try{
                   time=format.parse(_text).getTime();
-              } catch (Exception e) { time=0;return; }
+              } 
+              catch (Exception e) { time=0;return; }
               this.text = _text;
        }
        public void setTimestamp(Timestamp timestamp) {
@@ -68,12 +70,14 @@ public class ufpsTime {
        public static String getText(long _time) {
               try{
                   return format.format(new Date(_time));
-              } catch (Exception e) { return null; }
-              //return null;
+              } 
+              catch (Exception e) { return null; }
        }
 
-
-
+       public static void main(String args[]){
+              ufpsTime t=new ufpsTime();
+              System.out.println(t.getText());
+       }
 }
 
 

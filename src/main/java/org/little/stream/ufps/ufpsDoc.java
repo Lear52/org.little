@@ -2,9 +2,9 @@ package org.little.stream.ufps;
 
 public class ufpsDoc {
 
-       private String            format      ;
-       private String            type        ;
-       private String            id          ;
+       private String          format;
+       private String          type  ;
+       private String          id    ;
        private ufpsDocRefId    ref_id;
 
        public ufpsDoc() {

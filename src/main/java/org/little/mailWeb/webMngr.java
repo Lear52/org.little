@@ -43,11 +43,11 @@ public class webMngr extends webRun{
               xpath+=_xpath;
 
               boolean ret=cfg.loadCFG(xpath);
-              cfg.init();
               if(ret==false){
                  logger.error("error read config file:"+xpath);
                  return;
               }
+              cfg.init();
 
               logger.info("START LITTLE.IMAPWEB(VIEW) config:"+xpath+" "+Version.getVer()+"("+Version.getDate()+")");
               //-------------------------------------------------------------------------------------------------------

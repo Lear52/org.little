@@ -27,8 +27,8 @@ public class commonAUTH{
        
        public  static final  int NOAUTH   =0;
        public  static final  int STUB     =1;
-       public  static final  int LDAP     =2;
-       public  static final  int XML      =3;
+       public  static final  int XML      =2;
+       public  static final  int LDAP     =3;
        public  static final  int SPNEGO   =4;
 
        public commonAUTH(){clear();}
@@ -43,7 +43,8 @@ public class commonAUTH{
               java_security_krb5_conf        ="krb5.conf";
               java_security_auth_login_config="login.conf";
               auth_requared                  =true;
-              listuser_filename              ="user_h.xml";
+              //listuser_filename              ="user_h.xml";
+              listuser_filename              ="";
               auth_user                      =new authUserEmpty(this);
        }
        public void init(NodeList glist){
@@ -75,15 +76,15 @@ public class commonAUTH{
               System.setProperty("java.security.krb5.conf",        getPathKrb5() );
               System.setProperty("java.security.auth.login.config",getPathLogin());
 
-              logger.info("authenticateUser:"+type_authenticateUser);
+              logger.info("create authenticateUser:"+type_authenticateUser);
               switch(type_authenticateUser) {
-              case NOAUTH: auth_user=new authUserEmpty     (this);break;
-              case STUB  : auth_user=new authUserStub      (this);break;             
-              case LDAP  : auth_user=new authUserLDAP      (this);break;        
-              case XML   : auth_user=new authUserXML       (this);break;                  
-              case SPNEGO: auth_user=new authUserNegotiate (this);break;             
-                                         
-              default:     auth_user=new authUserEmpty     (this);break;
+              case NOAUTH: auth_user=new authUserEmpty     (this);logger.info("create authUserEmpty     code type:"+type_authenticateUser);break;
+              case STUB  : auth_user=new authUserStub      (this);logger.info("create authUserStub      code type:"+type_authenticateUser);break;             
+              case LDAP  : auth_user=new authUserLDAP      (this);logger.info("create authUserLDAP      code type:"+type_authenticateUser);break;        
+              case XML   : auth_user=new authUserXML       (this);logger.info("create authUserXML       code type:"+type_authenticateUser);break;                  
+              case SPNEGO: auth_user=new authUserNegotiate (this);logger.info("create authUserNegotiate code type:"+type_authenticateUser);break;             
+                                                                                                       
+              default:     auth_user=new authUserEmpty     (this);logger.info("create authUserEmpty    ");break;
               }
               
        }

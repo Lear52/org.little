@@ -3,7 +3,7 @@ package org.little.stream.ufps;
 
 //import prj0.util.Logger;
 
-public class ufpsDef{
+public class ufpsMsgField{
   public static final String H_ENVELOPE                           =   "Envelope"; 
   public static final String H_BODY                               = "Body";
   public static final String H_HEADER                             = "Header";

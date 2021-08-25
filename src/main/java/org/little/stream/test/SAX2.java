@@ -12,7 +12,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.little.stream.ufps.ufpsDef;
+import org.little.stream.ufps.ufpsMsgField;
 import org.little.stream.ufps.ufpsMsg;
 import org.little.util.Except;
 import org.little.util.Logger;
@@ -26,56 +26,56 @@ public class SAX2 {
            if(data==null)return;
            //logger.trace("elenment:"+element+" data:"+data);
            //if(element.equalsIgnoreCase(def.H_HEADER                    )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_NAME_TO                   )){msg.addTO(data)        ;}else
-           if(element.equalsIgnoreCase(ufpsDef.H_NAME_FROM                 )){msg.setFROM(data)      ;}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_NAME_TO                   )){msg.addTO(data)        ;}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_NAME_FROM                 )){msg.setFROM(data)      ;}else
            //if(element.equalsIgnoreCase(def.H_MESSAGE_INFO_TAG          )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_MESSAGE_TYPE              )){msg.setType(data)      ;}else
-           if(element.equalsIgnoreCase(ufpsDef.H_PRIORITY                  )){msg.setPriority(data)  ;}else
-           if(element.equalsIgnoreCase(ufpsDef.H_MESSAGE_ID                )){msg.setID(data)        ;}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_MESSAGE_TYPE              )){msg.setType(data)      ;}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_PRIORITY                  )){msg.setPriority(data)  ;}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_MESSAGE_ID                )){msg.setID(data)        ;}else
            //if(element.equalsIgnoreCase(def.H_LEGACY_TRANSPORT_FILE_NAME)){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_APPLICATION_MESSAGE_ID    )){msg.setAppID(data)     ;}else
-           if(element.equalsIgnoreCase(ufpsDef.H_CORRELATION_MESSAGE_ID    )){msg.setCorID(data)     ;}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_APPLICATION_MESSAGE_ID    )){msg.setAppID(data)     ;}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_CORRELATION_MESSAGE_ID    )){msg.setCorID(data)     ;}else
 
-           if(element.equalsIgnoreCase(ufpsDef.H_CREATE_TIME               )){msg.setCreateTime(data);}else
-           if(element.equalsIgnoreCase(ufpsDef.H_SEND_TIME                 )){msg.setSendTime(data)  ;}else
-           if(element.equalsIgnoreCase(ufpsDef.H_RECEIVE_TIME              )){msg.setReceveTime(data);}else
-           if(element.equalsIgnoreCase(ufpsDef.H_ACCEPT_TIME               )){msg.setAcceptTime(data);}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_CREATE_TIME               )){msg.setCreateTime(data);}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_SEND_TIME                 )){msg.setSendTime(data)  ;}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_RECEIVE_TIME              )){msg.setReceveTime(data);}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_ACCEPT_TIME               )){msg.setAcceptTime(data);}else
 
-           if(element.equalsIgnoreCase(ufpsDef.H_ACKNOLEDGE_REQUEST        )){msg.setAckRequest(data);}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_FORMAT                )){msg.setDocFormat (data);}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_TYPE                  )){msg.setDocType   (data);}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_ID                    )){msg.setDocID     (data);}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_REFID                 )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_EDNO                  )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_EDDATE                )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_EDAUTHOR              )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_ACKNOLEDGE_REQUEST        )){msg.setAckRequest(data);}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_FORMAT                )){msg.setDocFormat (data);}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_TYPE                  )){msg.setDocType   (data);}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_ID                    )){msg.setDocID     (data);}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_REFID                 )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_EDNO                  )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_EDDATE                )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_EDAUTHOR              )){}else
            {}
          
        }
        public static void setf(String element){
            if(element==null)return;
            //if(element.equalsIgnoreCase(def.H_HEADER                    )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_NAME_TO                   )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_NAME_FROM                 )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_NAME_TO                   )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_NAME_FROM                 )){}else
            //if(element.equalsIgnoreCase(def.H_MESSAGE_INFO_TAG          )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_MESSAGE_TYPE              )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_PRIORITY                  )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_MESSAGE_ID                )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_MESSAGE_TYPE              )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_PRIORITY                  )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_MESSAGE_ID                )){}else
            //if(element.equalsIgnoreCase(def.H_LEGACY_TRANSPORT_FILE_NAME)){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_CREATE_TIME               )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_APPLICATION_MESSAGE_ID    )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_CORRELATION_MESSAGE_ID    )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_SEND_TIME                 )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_RECEIVE_TIME              )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_ACCEPT_TIME               )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_ACKNOLEDGE_REQUEST        )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_FORMAT                )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_TYPE                  )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_ID                    )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_REFID                 )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_EDNO                  )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_EDDATE                )){}else
-           if(element.equalsIgnoreCase(ufpsDef.H_DOC_EDAUTHOR              )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_CREATE_TIME               )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_APPLICATION_MESSAGE_ID    )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_CORRELATION_MESSAGE_ID    )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_SEND_TIME                 )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_RECEIVE_TIME              )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_ACCEPT_TIME               )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_ACKNOLEDGE_REQUEST        )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_FORMAT                )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_TYPE                  )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_ID                    )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_REFID                 )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_EDNO                  )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_EDDATE                )){}else
+           if(element.equalsIgnoreCase(ufpsMsgField.H_DOC_EDAUTHOR              )){}else
            {}
          
  }

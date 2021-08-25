@@ -13,27 +13,23 @@ import org.little.util.LoggerFactory;
 
 public class senderUFPS2ZMQ {
        private static final Logger logger = LoggerFactory.getLogger(senderUFPS2ZMQ.class);
-       //private String     destinationName;
        private String     destinationURL;
        private ZContext   ctx;
        private ZMQ.Socket client;
        private long       timeout;
        private ZMQ.Poller poller;
 
-       //private clientAPI session;
-       
        public senderUFPS2ZMQ() {
               clear();
        }
 
        public senderUFPS2ZMQ(String clientHost, int clientPort, int _timeout) {
-    	   clear();
-           timeout        =_timeout;
-           destinationURL ="tcp://"+clientHost+":"+clientPort;
+              clear();
+              timeout        =_timeout;
+              destinationURL ="tcp://"+clientHost+":"+clientPort;
        }
 
-	protected void clear() {
-              //destinationName=null;
+          private void clear() {
               timeout        =25000;
               destinationURL ="tcp://localhost:5555";
               ctx            =null;   
@@ -41,15 +37,14 @@ public class senderUFPS2ZMQ {
               poller         =null;
        }
        
-       public void open() {
-              //destinationName="test_queue";
-
+       public boolean open() {
               ctx    = new ZContext();
               client = ctx.createSocket(SocketType.REQ);
               client.connect(destinationURL);
               int size_poller=1;
               poller = ctx.createPoller(size_poller);
               poller.register(client, ZMQ.Poller.POLLIN);
+              return true;
        }
        public void close(){
               if(poller!=null){
@@ -87,19 +82,12 @@ public class senderUFPS2ZMQ {
        }
 
        
-       private ZMsg send( ZMsg request){
-
+       public ZMsg send( ZMsg request){
                logger.trace("send cln 0");
-
-               //request.push(new ZFrame(queue));
-               //request.push(new ZFrame("MDPC01".getBytes(ZMQ.CHARSET)));
-
                ZMsg reply = null;
-
                while(!Thread.currentThread().isInterrupted()) {
                      try{
                          request.duplicate().send(client);
-                        
                          while(true){
                                if (poller.poll(timeout) == -1) break; // Interrupted
                                //logger.trace("send cln 3");
@@ -120,9 +108,6 @@ public class senderUFPS2ZMQ {
                request.destroy();
                return reply;
        }
-
-
-
 
        public static void main(String[] args) {
               senderUFPS2ZMQ sender=new senderUFPS2ZMQ();

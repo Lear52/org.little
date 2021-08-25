@@ -2,6 +2,7 @@ package org.little.stream.cfg;
 
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
+import org.little.util.string.stringTransform;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -60,12 +61,12 @@ public class commonChannel  {
 
        public void    init(Node _node_cfg,int _max_size_queue){
                if(_node_cfg!=null){
-            	   max_size_queue=_max_size_queue;
+                  max_size_queue=_max_size_queue;
                   logger.info("The configuration node:"+_node_cfg.getNodeName());
-                  if(_node_cfg.getAttributes().getNamedItem("name")   !=null) { name=_node_cfg.getAttributes().getNamedItem("name").getNodeValue();      logger.info("name:"   +name);   }
-                  if(_node_cfg.getAttributes().getNamedItem("type")   !=null) { type=_node_cfg.getAttributes().getNamedItem("type").getNodeValue();      logger.info("type:"   +type);   }
+                  if(_node_cfg.getAttributes().getNamedItem("name")   !=null) { name   =_node_cfg.getAttributes().getNamedItem("name").getNodeValue();   logger.info("name:"   +name);   }
+                  if(_node_cfg.getAttributes().getNamedItem("type")   !=null) { type   =_node_cfg.getAttributes().getNamedItem("type").getNodeValue();   logger.info("type:"   +type);   }
                   if(_node_cfg.getAttributes().getNamedItem("subtype")!=null) { subtype=_node_cfg.getAttributes().getNamedItem("subtype").getNodeValue();logger.info("subtype:"+subtype);}
-                  if(_node_cfg.getAttributes().getNamedItem("id")     !=null) { type=_node_cfg.getAttributes().getNamedItem("id").getNodeValue();        logger.info("id:"     +id);     }
+                  if(_node_cfg.getAttributes().getNamedItem("id")     !=null) { id     =_node_cfg.getAttributes().getNamedItem("id").getNodeValue();     logger.info("id:"     +id);     }
       
                   NodeList glist=_node_cfg.getChildNodes();     
                   for(int i=0;i<glist.getLength();i++){
@@ -78,6 +79,9 @@ public class commonChannel  {
                       if("client_host"       .equalsIgnoreCase(n.getNodeName())){client_host      =n.getTextContent(); logger.info("client_host:"      +client_host      );}else
                       {}
                   }
+
+                  if(stringTransform.isEmpty(local_bind_server))local_bind_server="*";
+                  if(stringTransform.isEmpty(local_bind_client))local_bind_client="*";
       
                   if(type.equalsIgnoreCase("server")){}else
                   if(type.equalsIgnoreCase("client")){
@@ -89,7 +93,7 @@ public class commonChannel  {
                      }else
                      {logger.error("channel_type:"+type+" channel_subtype:"+subtype +"trans|local");return;}
       
-                  }else{logger.error("channel_type:"+type+"servar|client");return;}
+                  }else{logger.error("channel_type:"+type+" servar|client");return;}
       
                }
                else{

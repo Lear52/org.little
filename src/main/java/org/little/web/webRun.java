@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.little.util.Except;
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
 
@@ -73,8 +74,8 @@ public class webRun extends HttpServlet {
                     request.setCharacterEncoding("UTF-8");
                     response.setCharacterEncoding("UTF-8");
                 } catch (UnsupportedEncodingException e1) {
-                    /**/
-                    e1.printStackTrace();
+                   logger.error("setCharacterEncoding "+new Except("ex:",e1));
+                   return;
                 }
         
         }
